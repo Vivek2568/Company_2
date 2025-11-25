@@ -3,16 +3,17 @@ import axios from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { motion } from 'framer-motion';
 
 const CommentItem = ({ comment, onDelete, onLike, onReply, currentUser }) => {
   const isAuthor = currentUser && comment.userId?._id === currentUser._id;
   const isLiked = currentUser && comment.likes?.includes(currentUser._id);
 
   return (
-    <div className="py-6 border-b border-slate-200 last:border-0">
-      <div className="flex gap-3">
+    <div className="py-3 border-b border-slate-200 dark:border-slate-700 last:border-0">
+      <div className="flex gap-2">
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
           <span className="text-sm font-bold text-white uppercase">
             {comment.userId?.username?.[0] || 'U'}
           </span>
@@ -21,11 +22,11 @@ const CommentItem = ({ comment, onDelete, onLike, onReply, currentUser }) => {
         {/* Comment Content */}
         <div className="flex-1">
           {/* Header */}
-          <div className="flex items-center gap-2 mb-2">
-            <span className="font-semibold text-slate-900">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-semibold text-slate-900 dark:text-white text-sm">
               {comment.userId?.username || 'Unknown User'}
             </span>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               {new Date(comment.createdAt).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
@@ -36,69 +37,75 @@ const CommentItem = ({ comment, onDelete, onLike, onReply, currentUser }) => {
 
           {/* Content */}
           <div 
-            className="text-slate-700 leading-relaxed mb-3 prose prose-sm max-w-none
-              prose-p:my-1 prose-a:text-blue-600 hover:prose-a:underline"
+            className="text-slate-700 dark:text-slate-300 leading-relaxed mb-2 prose prose-sm dark:prose-invert max-w-none
+              prose-p:my-1 prose-a:text-blue-600 dark:prose-a:text-blue-400 hover:prose-a:underline"
             dangerouslySetInnerHTML={{ __html: comment.content }}
           />
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
-            <button
+          <div className="flex items-center gap-3 text-sm">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => onLike(comment._id)}
               className={`flex items-center gap-1 text-sm transition-colors ${
                 isLiked 
-                  ? 'text-red-500 hover:text-red-600' 
-                  : 'text-slate-500 hover:text-red-500'
+                  ? 'text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300' 
+                  : 'text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400'
               }`}
             >
               <span className="material-symbols-outlined text-base">
                 {isLiked ? 'favorite' : 'favorite_border'}
               </span>
               <span>{comment.likes?.length || 0}</span>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => onReply(comment._id)}
-              className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+              className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
             >
               <span className="material-symbols-outlined text-base">reply</span>
               <span>Reply</span>
-            </button>
+            </motion.button>
 
             {isAuthor && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => onDelete(comment._id)}
-                className="flex items-center gap-1 text-sm text-slate-500 hover:text-red-500 transition-colors ml-auto"
+                className="flex items-center gap-1 text-sm text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors ml-auto"
               >
                 <span className="material-symbols-outlined text-base">delete</span>
                 <span>Delete</span>
-              </button>
+              </motion.button>
             )}
           </div>
 
           {/* Replies */}
           {comment.replies && comment.replies.length > 0 && (
-            <div className="mt-4 space-y-4">
+            <div className="mt-3 space-y-2">
               {comment.replies.map((reply) => (
-                <div key={reply._id} className="flex gap-3 pl-4 border-l-2 border-slate-200">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-500 to-slate-700 flex items-center justify-center flex-shrink-0">
+                <div key={reply._id} className="flex gap-2 pl-3 border-l border-slate-200 dark:border-slate-700">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
                     <span className="text-xs font-bold text-white uppercase">
                       {reply.userId?.username?.[0] || 'U'}
                     </span>
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-sm text-slate-900">
+                      <span className="font-semibold text-sm text-slate-900 dark:text-white">
                         {reply.userId?.username || 'Unknown User'}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
                         {new Date(reply.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric'
                         })}
                       </span>
                     </div>
-                    <div className="text-sm text-slate-700">{reply.content}</div>
+                    <div className="text-sm text-slate-700 dark:text-slate-300">{reply.content}</div>
                   </div>
                 </div>
               ))}
@@ -186,18 +193,29 @@ const Comments = ({ postId }) => {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="mb-4"
+      >
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
           Comments ({comments.length})
         </h2>
-        <div className="h-1 w-16 bg-slate-900"></div>
-      </div>
+        <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
+      </motion.div>
 
       {/* Comment Form */}
       {user ? (
-        <form onSubmit={handleSubmit} className="mb-10">
+        <motion.form
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          onSubmit={handleSubmit}
+          className="mb-6 p-4 bg-slate-50 card-bg rounded-lg border border-slate-200 dark:border-slate-700"
+        >
           {replyTo && (
-            <div className="mb-3 flex items-center gap-2 text-sm text-slate-600">
+            <div className="mb-4 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
               <span className="material-symbols-outlined text-base">reply</span>
               <span>Replying to comment</span>
               <button
@@ -206,16 +224,16 @@ const Comments = ({ postId }) => {
                   setReplyTo(null);
                   setContent('');
                 }}
-                className="text-slate-400 hover:text-slate-600 ml-2"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 ml-auto"
               >
                 <span className="material-symbols-outlined text-base">close</span>
               </button>
             </div>
           )}
           
-          <div className="flex gap-3">
+            <div className="flex gap-2">
             {/* User Avatar */}
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-bold text-white uppercase">
                 {user.username?.[0]}
               </span>
@@ -227,62 +245,87 @@ const Comments = ({ postId }) => {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={replyTo ? 'Write a reply...' : 'Write a comment...'}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent resize-none text-slate-900 placeholder-slate-400"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white card-bg rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent resize-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                 rows="3"
               />
-              <div className="flex justify-end gap-2 mt-3">
+              <div className="flex justify-end gap-2 mt-2">
                 {replyTo && (
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={() => {
                       setReplyTo(null);
                       setContent('');
                     }}
-                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                    className="px-3 py-1 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     Cancel
-                  </button>
+                  </motion.button>
                 )}
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={!content.trim()}
-                  className="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-md font-medium hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {replyTo ? 'Reply' : 'Comment'}
-                </button>
+                </motion.button>
               </div>
             </div>
           </div>
-        </form>
+        </motion.form>
       ) : (
-        <div className="mb-10 p-6 bg-slate-50 rounded-lg border border-slate-200 text-center">
-          <p className="text-slate-600 mb-4">Join the conversation</p>
-          <button
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-10 p-6 bg-slate-50 card-bg rounded-xl border border-slate-200 dark:border-slate-700 text-center"
+        >
+          <p className="text-slate-600 dark:text-slate-300 mb-4 font-medium">Join the conversation</p>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigate('/login')}
-            className="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-colors"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all"
           >
             Sign in to comment
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       )}
 
       {/* Comments List */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="flex items-center gap-2 text-slate-600">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex justify-center py-12"
+        >
+          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
             <span className="material-symbols-outlined animate-spin">refresh</span>
             <span>Loading comments...</span>
           </div>
-        </div>
+        </motion.div>
       ) : (
         <div>
           {comments.length === 0 ? (
-            <div className="text-center py-12">
-              <span className="material-symbols-outlined text-5xl text-slate-300 mb-3">chat_bubble_outline</span>
-              <p className="text-slate-500">No comments yet. Be the first to comment!</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="text-center py-12"
+            >
+              <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 mb-3 block">chat_bubble_outline</span>
+              <p className="text-slate-500 dark:text-slate-400">No comments yet. Be the first to comment!</p>
+            </motion.div>
           ) : (
-            <div className="space-y-0">
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-0"
+            >
               {comments.map((comment) => (
                 <CommentItem
                   key={comment._id}
@@ -293,7 +336,7 @@ const Comments = ({ postId }) => {
                   currentUser={user}
                 />
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       )}

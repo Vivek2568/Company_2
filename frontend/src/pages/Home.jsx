@@ -102,8 +102,7 @@ const Home = () => {
 
 return (
   <main
-    className="relative flex min-h-screen w-full flex-col overflow-x-hidden font-display text-slate-800 dark:text-slate-200"
-    style={{ backgroundColor: "#FFFBEB" }}
+    className="relative flex min-h-screen w-full flex-col overflow-x-hidden font-display text-slate-800 dark:text-slate-200 bg-[#FFFBEB] page-bg"
   >
     {/* HERO SECTION */}
     <section className="relative flex h-auto min-h-[75vh] w-full flex-col">
@@ -199,7 +198,7 @@ return (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 xl:grid-cols-3">
           {latestPosts.map((post) => {
             const imageUrl = post.images?.[0]
-              ? `http://localhost:5000/${post.images[0]}`
+              ? `http://localhost:5000/uploads/${post.images[0]}`
               : (post.thumbnail || "https://via.placeholder.com/400");
             
             return (

@@ -14,135 +14,171 @@ import Underline from '@tiptap/extension-underline';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { toast } from 'react-toastify';
+import { motion, AnimatePresence } from 'framer-motion';
+import clsx from 'clsx';
 
-const MenuBar = ({ editor }) => {
+const ToolBar = ({ editor }) => {
   if (!editor) return null;
 
-  return (
-    <div className="border-b border-slate-200 bg-white p-2 flex flex-wrap gap-1">
-      {/* Text Formatting */}
-      <div className="flex gap-1 pr-2 border-r border-slate-200">
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-2 rounded transition-colors ${
-            editor.isActive('bold') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-          title="Bold"
-        >
-          <span className="material-symbols-outlined text-lg">format_bold</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-2 rounded transition-colors ${
-            editor.isActive('italic') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-          title="Italic"
-        >
-          <span className="material-symbols-outlined text-lg">format_italic</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={`p-2 rounded transition-colors ${
-            editor.isActive('underline') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-          title="Underline"
-        >
-          <span className="material-symbols-outlined text-lg">format_underlined</span>
-        </button>
-      </div>
-
-      {/* Headings */}
-      <div className="flex gap-1 pr-2 border-r border-slate-200">
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={`px-3 py-2 rounded text-sm font-semibold transition-colors ${
-            editor.isActive('heading', { level: 2 }) ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-          title="Heading"
-        >
-          H2
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={`px-3 py-2 rounded text-sm font-semibold transition-colors ${
-            editor.isActive('heading', { level: 3 }) ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-          title="Subheading"
-        >
-          H3
-        </button>
-      </div>
-
-      {/* Lists */}
-      <div className="flex gap-1 pr-2 border-r border-slate-200">
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded transition-colors ${
-            editor.isActive('bulletList') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-          title="Bullet List"
-        >
-          <span className="material-symbols-outlined text-lg">format_list_bulleted</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`p-2 rounded transition-colors ${
-            editor.isActive('orderedList') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-          title="Numbered List"
-        >
-          <span className="material-symbols-outlined text-lg">format_list_numbered</span>
-        </button>
-      </div>
-
-      {/* Quote & Code */}
-      <div className="flex gap-1 pr-2 border-r border-slate-200">
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={`p-2 rounded transition-colors ${
-            editor.isActive('blockquote') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-          title="Quote"
-        >
-          <span className="material-symbols-outlined text-lg">format_quote</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          className={`p-2 rounded transition-colors ${
-            editor.isActive('codeBlock') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-          title="Code"
-        >
-          <span className="material-symbols-outlined text-lg">code</span>
-        </button>
-      </div>
-
-      {/* Link */}
-      <button
-        type="button"
-        onClick={() => {
+  const toolGroups = [
+    {
+      label: 'Text',
+      tools: [
+        { icon: 'format_bold', tooltip: 'Bold (Ctrl+B)', action: () => editor.chain().focus().toggleBold().run(), active: editor.isActive('bold') },
+        { icon: 'format_italic', tooltip: 'Italic (Ctrl+I)', action: () => editor.chain().focus().toggleItalic().run(), active: editor.isActive('italic') },
+        { icon: 'format_underlined', tooltip: 'Underline', action: () => editor.chain().focus().toggleUnderline().run(), active: editor.isActive('underline') },
+      ]
+    },
+    {
+      label: 'Heading',
+      tools: [
+        { label: 'H1', tooltip: 'Heading 1', action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(), active: editor.isActive('heading', { level: 1 }) },
+        { label: 'H2', tooltip: 'Heading 2', action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(), active: editor.isActive('heading', { level: 2 }) },
+        { label: 'H3', tooltip: 'Heading 3', action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(), active: editor.isActive('heading', { level: 3 }) },
+      ]
+    },
+    {
+      label: 'List',
+      tools: [
+        { icon: 'format_list_bulleted', tooltip: 'Bullet List', action: () => editor.chain().focus().toggleBulletList().run(), active: editor.isActive('bulletList') },
+        { icon: 'format_list_numbered', tooltip: 'Numbered List', action: () => editor.chain().focus().toggleOrderedList().run(), active: editor.isActive('orderedList') },
+      ]
+    },
+    {
+      label: 'Quote',
+      tools: [
+        { icon: 'format_quote', tooltip: 'Quote', action: () => editor.chain().focus().toggleBlockquote().run(), active: editor.isActive('blockquote') },
+        { icon: 'code', tooltip: 'Code Block', action: () => editor.chain().focus().toggleCodeBlock().run(), active: editor.isActive('codeBlock') },
+      ]
+    },
+    {
+      label: 'Link',
+      tools: [
+        { icon: 'link', tooltip: 'Add Link', action: () => {
           const url = window.prompt('Enter URL:');
-          if (url) {
-            editor.chain().focus().setLink({ href: url }).run();
-          }
-        }}
-        className={`p-2 rounded transition-colors ${
-          editor.isActive('link') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
-        }`}
-        title="Add Link"
-      >
-        <span className="material-symbols-outlined text-lg">link</span>
-      </button>
+          if (url) editor.chain().focus().setLink({ href: url }).run();
+        }, active: editor.isActive('link') },
+      ]
+    }
+  ];
+
+  return (
+    <div className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 p-4 flex flex-wrap gap-4 sticky top-0 z-40">
+      {toolGroups.map((group, idx) => (
+        <div key={idx} className="flex items-center gap-2">
+          <div className="flex gap-1 p-2 bg-white card-bg rounded-lg border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md transition-shadow">
+            {group.tools.map((tool, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={tool.action}
+                title={tool.tooltip}
+                className={clsx(
+                  'p-2 rounded transition-all duration-200',
+                  tool.active
+                    ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-600'
+                )}
+              >
+                {tool.icon ? (
+                  <span className="material-symbols-outlined text-lg">{tool.icon}</span>
+                ) : (
+                  <span className="text-xs font-bold">{tool.label}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
+  );
+};
+
+// Preview Modal Component
+const PreviewModal = ({ isOpen, onClose, title, content, images, categories, tags, availableCategories, availableTags }) => {
+  if (!isOpen) return null;
+
+  const categoryName = availableCategories.find(c => c._id === categories[0])?.name || 'Uncategorized';
+  const tagNames = tags.map(tId => availableTags.find(t => t._id === tId)?.name || '').filter(Boolean);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          onClick={e => e.stopPropagation()}
+          className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        >
+          {/* Preview Header */}
+          <div className="sticky top-0 bg-gradient-to-r from-slate-900 to-slate-800 text-white p-6 flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Preview</h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          {/* Preview Content */}
+          <div className="p-8 space-y-6">
+            {/* Preview Images */}
+            {images.length > 0 && (
+              <div className="space-y-3">
+                {images.map((src, idx) => (
+                  <img key={idx} src={src} alt="preview" className="w-full h-auto rounded-lg shadow-lg" />
+                ))}
+              </div>
+            )}
+
+            {/* Title */}
+            <div>
+              <h1 className="text-4xl font-bold text-slate-900 mb-4">{title || 'Untitled Post'}</h1>
+              <div className="flex items-center gap-3 text-sm text-slate-600">
+                <span className="px-3 py-1 bg-slate-100 rounded-full">{categoryName}</span>
+              </div>
+            </div>
+
+            {/* Tags */}
+            {tagNames.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {tagNames.map((tag, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-slate-700 rounded-full text-sm font-medium">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Divider */}
+            <hr className="my-6 border-slate-200" />
+
+            {/* Content Preview */}
+            <div
+              className="prose prose-lg max-w-none
+                prose-headings:text-slate-900 prose-headings:font-bold
+                prose-p:text-slate-700 prose-p:leading-relaxed
+                prose-a:text-blue-600 prose-a:underline
+                prose-strong:font-bold prose-strong:text-slate-900
+                prose-em:text-slate-700
+                prose-code:bg-slate-100 prose-code:text-slate-800 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
+                prose-blockquote:border-l-4 prose-blockquote:border-slate-400 prose-blockquote:pl-4 prose-blockquote:italic
+                prose-li:text-slate-700
+              "
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
@@ -170,6 +206,9 @@ const CreateEditPost = () => {
   const [fetchLoading, setFetchLoading] = useState(!!id);
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showTagInput, setShowTagInput] = useState(false);
+  const [tagSearch, setTagSearch] = useState('');
 
   // TipTap Editor
   const editor = useEditor({
@@ -234,6 +273,7 @@ const CreateEditPost = () => {
       setStatus(post.status);
     } catch (error) {
       console.error('Error fetching post:', error);
+      toast.error('Failed to load post');
     } finally {
       setFetchLoading(false);
     }
@@ -245,6 +285,7 @@ const CreateEditPost = () => {
       setAvailableCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      toast.error('Failed to load categories');
     }
   };
 
@@ -254,21 +295,46 @@ const CreateEditPost = () => {
       setAvailableTags(response.data);
     } catch (error) {
       console.error('Error fetching tags:', error);
+      toast.error('Failed to load tags');
     }
+  };
+
+  const handleTagToggle = (tagId) => {
+    setTags(prev => 
+      prev.includes(tagId) ? prev.filter(t => t !== tagId) : [...prev, tagId]
+    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!title.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+
+    if (!content.trim() || content === '<p></p>') {
+      toast.error('Please write some content');
+      return;
+    }
+
+    if (images.length === 0) {
+      toast.warn('No images selected!');
+      return;
+    }
+
+    if (!categories[0]) {
+      toast.error('Please select a category');
+      return;
+    }
+
     setLoading(true);
     try {
-      if (!images || images.length === 0) {
-        toast.warn('No images selected!');
-      }
       const formData = new FormData();
       formData.append('title', title);
       formData.append('content', content);
       formData.append('status', status);
-      if (categories[0]) formData.append('categories', categories[0]);
+      formData.append('categories', categories[0]);
       tags.forEach(tag => formData.append('tags', tag));
       images.forEach(img => formData.append('images', img));
 
@@ -300,189 +366,458 @@ const CreateEditPost = () => {
 
   if (fetchLoading) return <Loader />;
 
+  const filteredTags = availableTags.filter(tag =>
+    tag.name.toLowerCase().includes(tagSearch.toLowerCase()) && !tags.includes(tag._id)
+  );
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header Bar */}
-      <div className="border-b border-slate-200 bg-white sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white card-bg">
+      {/* Header */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="sticky top-0 z-50 bg-white card-bg border-b border-slate-200 dark:border-slate-700 shadow-sm"
+      >
+        <div className="max-w-5xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <button
+            {/* Back Button */}
+            <motion.button
+              whileHover={{ x: -4 }}
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+              className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
             >
-              <span className="material-symbols-outlined text-xl">arrow_back</span>
+              <span className="material-symbols-outlined">arrow_back</span>
               <span className="font-medium text-sm">Back</span>
-            </button>
-            
+            </motion.button>
+
             <div className="flex items-center gap-3">
+              {/* Preview Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowPreview(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 card-bg text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                <span className="material-symbols-outlined">preview</span>
+                <span className="text-sm font-medium hidden sm:inline">Preview</span>
+              </motion.button>
+
               {/* Status Badge */}
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                status === 'published' 
-                  ? 'bg-green-100 text-green-700' 
-                  : 'bg-yellow-100 text-yellow-700'
-              }`}>
+              <motion.span
+                className={clsx(
+                  'px-3 py-1 rounded-full text-xs font-semibold',
+                  status === 'published'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                    : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                )}
+              >
                 {status === 'published' ? 'Published' : 'Draft'}
-              </span>
-              
+              </motion.span>
+
               {/* Publish Button */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleSubmit}
                 disabled={loading}
-                className="flex items-center gap-2 px-5 py-2 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-5 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
               >
                 {loading ? (
                   <>
-                    <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
-                    Saving...
+                    <span className="material-symbols-outlined animate-spin text-lg">refresh</span>
+                    <span className="text-sm">Saving...</span>
                   </>
                 ) : (
                   <>
-                    {id ? 'Update' : 'Publish'}
+                    <span className="material-symbols-outlined text-lg">{id ? 'check' : 'publish'}</span>
+                    <span className="text-sm">{id ? 'Update' : 'Publish'}</span>
                   </>
                 )}
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title Input */}
-          <div>
+      <div className="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <motion.form
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onSubmit={handleSubmit}
+          className="space-y-6"
+        >
+          {/* Title Section */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-xl p-6 shadow-md border border-slate-200 dark:border-slate-700"
+          >
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              placeholder="Post title"
-              className="w-full text-3xl sm:text-4xl font-bold text-slate-900 placeholder-slate-400 border-0 focus:ring-0 outline-none bg-transparent p-0"
+              placeholder="Enter your blog title..."
+              className="w-full text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 border-0 focus:ring-0 outline-none bg-transparent"
             />
-          </div>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Make it catchy and engaging</p>
+          </motion.div>
 
           {/* Image Upload Section */}
-          {imagePreviews.length === 0 ? (
-            <div className="relative group">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              />
-              <div className="border-2 border-dashed border-slate-300 rounded-lg p-10 flex flex-col items-center justify-center text-center transition-colors group-hover:border-slate-400 group-hover:bg-slate-50">
-                <span className="material-symbols-outlined text-4xl text-slate-400 mb-3">image</span>
-                <p className="text-sm font-medium text-slate-600">Add cover image</p>
-                <p className="text-xs text-slate-500 mt-1">Click to browse or drag and drop</p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {imagePreviews.map((src, idx) => (
-                <div key={idx} className="relative group">
-                  <img src={src} alt="preview" className="w-full h-80 object-cover rounded-lg" />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(idx)}
-                    className="absolute top-3 right-3 w-8 h-8 bg-white text-slate-700 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
-                  >
-                    <span className="material-symbols-outlined text-sm">close</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* TipTap Editor */}
-          <div className="border border-slate-200 rounded-lg overflow-hidden">
-            <MenuBar editor={editor} />
-            <EditorContent 
-              editor={editor} 
-              className="prose prose-lg max-w-none p-6 min-h-[500px] 
-                prose-headings:text-slate-900 
-                prose-p:text-slate-700 
-                prose-a:text-blue-600 
-                prose-strong:text-slate-900
-                prose-code:bg-slate-100 prose-code:text-slate-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-                prose-blockquote:border-l-4 prose-blockquote:border-slate-300 prose-blockquote:pl-4"
-            />
-          </div>
-
-          {/* Publishing Options */}
-          <div className="border-t border-slate-200 pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
-                <select
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-                  value={categories[0] || ''}
-                  onChange={e => setCategories([e.target.value])}
-                  required
-                >
-                  <option value="" disabled>Select</option>
-                  {availableCategories.map(cat => (
-                    <option key={cat._id} value={cat._id}>{cat.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
-                <select
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                </select>
-              </div>
-
-              {/* Tags */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Tags</label>
-                <select
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.15 }}
+          >
+            {imagePreviews.length === 0 ? (
+              <div className="relative group">
+                <input
+                  type="file"
+                  accept="image/*"
                   multiple
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent min-h-[42px]"
-                  value={tags}
-                  onChange={e => {
-                    const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
-                    setTags(selected);
-                  }}
-                >
-                  {availableTags.map(tag => (
-                    <option key={tag._id} value={tag._id}>{tag.name}</option>
-                  ))}
-                </select>
+                  onChange={handleImageChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-12 flex flex-col items-center justify-center text-center transition-all group-hover:border-blue-400 dark:group-hover:border-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/20 group-hover:shadow-lg cursor-pointer">
+                  <motion.span
+                    className="material-symbols-outlined text-6xl text-slate-400 dark:text-slate-500 mb-4 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors"
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    image
+                  </motion.span>
+                  <p className="text-lg font-semibold text-slate-900 dark:text-slate-200">Add your cover image</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Click to browse or drag and drop</p>
+                  <p className="text-slate-400 dark:text-slate-500 text-xs mt-3">Support: JPG, PNG, WebP (Max 5MB)</p>
+                </div>
               </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">Cover Images</p>
+                {imagePreviews.map((src, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="relative group rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700"
+                  >
+                    <img src={src} alt="preview" className="w-full h-80 object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-4 right-4 w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                    </motion.button>
+                  </motion.div>
+                ))}
+                <motion.label
+                  whileHover={{ scale: 1.02 }}
+                  className="block border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all"
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <span className="material-symbols-outlined text-2xl text-slate-400 dark:text-slate-500 mb-2 inline-block">add_photo_alternate</span>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm">Add more images</p>
+                </motion.label>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Editor Section */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 bg-white card-bg"
+          >
+            <ToolBar editor={editor} />
+            <EditorContent
+              editor={editor}
+              className="text-editor-content bg-[#FFFBEB] page-bg"
+              style={{
+                minHeight: '500px',
+                padding: '24px'
+              }}
+            />
+            <style>{`
+              .text-editor-content {
+                background-color: #FFFBEB;
+              }
+              .dark .text-editor-content {
+                background-color: #1e293b;
+              }
+              .text-editor-content .ProseMirror {
+                outline: none;
+              }
+              .text-editor-content .ProseMirror p {
+                color: #0f172a;
+                line-height: 1.75;
+                margin-bottom: 1rem;
+              }
+              .dark .text-editor-content .ProseMirror p {
+                color: #cbd5e1;
+              }
+              .text-editor-content .ProseMirror h1 {
+                font-size: 2em;
+                font-weight: bold;
+                color: #0e141b;
+                margin: 1.5rem 0 0.5rem;
+              }
+              .dark .text-editor-content .ProseMirror h1 {
+                color: #f1f5f9;
+              }
+              .text-editor-content .ProseMirror h2 {
+                font-size: 1.5em;
+                font-weight: bold;
+                color: #0e141b;
+                margin: 1.25rem 0 0.5rem;
+              }
+              .dark .text-editor-content .ProseMirror h2 {
+                color: #f1f5f9;
+              }
+              .text-editor-content .ProseMirror h3 {
+                font-size: 1.25em;
+                font-weight: bold;
+                color: #0e141b;
+                margin: 1rem 0 0.25rem;
+              }
+              .dark .text-editor-content .ProseMirror h3 {
+                color: #f1f5f9;
+              }
+              .text-editor-content .ProseMirror a {
+                color: #2563eb;
+                text-decoration: underline;
+              }
+              .text-editor-content .ProseMirror strong {
+                font-weight: bold;
+                color: #0e141b;
+              }
+              .dark .text-editor-content .ProseMirror strong {
+                color: #f1f5f9;
+              }
+              .text-editor-content .ProseMirror em {
+                font-style: italic;
+              }
+              .text-editor-content .ProseMirror u {
+                text-decoration: underline;
+              }
+              .text-editor-content .ProseMirror blockquote {
+                border-left: 4px solid #cbd5e1;
+                padding-left: 1rem;
+                color: #4d7399;
+                font-style: italic;
+                margin: 1rem 0;
+              }
+              .dark .text-editor-content .ProseMirror blockquote {
+                color: #94a3b8;
+              }
+              .text-editor-content .ProseMirror code {
+                background-color: #f3f4f6;
+                color: #0e141b;
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                font-family: monospace;
+              }
+              .dark .text-editor-content .ProseMirror code {
+                background-color: #0f172a;
+                color: #60a5fa;
+              }
+              .text-editor-content .ProseMirror pre {
+                background-color: #f3f4f6;
+                color: #0e141b;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                overflow-x: auto;
+                margin: 1rem 0;
+              }
+              .dark .text-editor-content .ProseMirror pre {
+                background-color: #0f172a;
+                color: #60a5fa;
+              }
+              .text-editor-content .ProseMirror pre code {
+                background: none;
+                color: inherit;
+                padding: 0;
+              }
+              .text-editor-content .ProseMirror ul {
+                list-style-type: disc;
+                margin-left: 2rem;
+                color: #0f172a;
+              }
+              .dark .text-editor-content .ProseMirror ul {
+                color: #cbd5e1;
+              }
+              .text-editor-content .ProseMirror ol {
+                list-style-type: decimal;
+                margin-left: 2rem;
+                color: #0f172a;
+              }
+              .dark .text-editor-content .ProseMirror ol {
+                color: #cbd5e1;
+              }
+              .text-editor-content .ProseMirror li {
+                margin-bottom: 0.5rem;
+              }
+              .text-editor-content .ProseMirror img {
+                border-radius: 0.5rem;
+                max-width: 100%;
+                height: auto;
+                margin: 1rem 0;
+              }
+            `}</style>
+          </motion.div>
+
+          {/* Metadata Section */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.25 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            {/* Category */}
+            <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-3">Category</label>
+              <select
+                className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white bg-white card-bg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
+                value={categories[0] || ''}
+                onChange={e => setCategories([e.target.value])}
+                required
+              >
+                <option value="" disabled>Select a category</option>
+                {availableCategories.map(cat => (
+                  <option key={cat._id} value={cat._id}>{cat.name}</option>
+                ))}
+              </select>
             </div>
 
-            {/* Selected Tags Display */}
+            {/* Status */}
+            <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-3">Status</label>
+              <select
+                className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white bg-white card-bg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+          </motion.div>
+
+          {/* Tags Section */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-700"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">Tags</label>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                type="button"
+                onClick={() => setShowTagInput(!showTagInput)}
+                className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+              >
+                <span className="material-symbols-outlined text-sm">add</span>
+                Add
+              </motion.button>
+            </div>
+
+            {/* Selected Tags */}
             {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mb-4">
                 {tags.map(tagId => {
                   const tag = availableTags.find(t => t._id === tagId);
                   return tag ? (
-                    <span key={tagId} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm flex items-center gap-2">
-                      {tag.name}
-                      <button
+                    <motion.span
+                      key={tagId}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm font-medium flex items-center gap-2 shadow-sm"
+                    >
+                      #{tag.name}
+                      <motion.button
+                        whileHover={{ scale: 1.2 }}
+                        whileTap={{ scale: 0.9 }}
                         type="button"
-                        onClick={() => setTags(tags.filter(t => t !== tagId))}
-                        className="hover:text-red-500"
+                        onClick={() => handleTagToggle(tagId)}
+                        className="hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-1 transition-colors"
                       >
                         <span className="material-symbols-outlined text-sm">close</span>
-                      </button>
-                    </span>
+                      </motion.button>
+                    </motion.span>
                   ) : null;
                 })}
               </div>
             )}
-          </div>
-        </form>
+
+            {/* Tag Input */}
+            <AnimatePresence>
+              {showTagInput && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-3 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700"
+                >
+                  <input
+                    type="text"
+                    value={tagSearch}
+                    onChange={(e) => setTagSearch(e.target.value)}
+                    placeholder="Search tags..."
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white bg-white card-bg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    {filteredTags.map(tag => (
+                      <motion.button
+                        key={tag._id}
+                        whileHover={{ scale: 1.05 }}
+                        type="button"
+                        onClick={() => {
+                          handleTagToggle(tag._id);
+                          setTagSearch('');
+                        }}
+                        className="px-3 py-1 bg-slate-200 card-bg text-slate-700 dark:text-slate-300 rounded-full text-sm hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white transition-all"
+                      >
+                        + {tag.name}
+                      </motion.button>
+                    ))}
+                  </div>
+                  {filteredTags.length === 0 && tagSearch && (
+                    <p className="text-slate-500 dark:text-slate-400 text-sm text-center py-4">No tags found</p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </motion.form>
       </div>
+
+      {/* Preview Modal */}
+      <PreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={title}
+        content={content}
+        images={imagePreviews}
+        categories={categories}
+        tags={tags}
+        availableCategories={availableCategories}
+        availableTags={availableTags}
+      />
     </div>
   );
 };

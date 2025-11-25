@@ -9,6 +9,12 @@
 	--surface-dark: #0b1220;
 	--text-light: #0f172a;
 	--text-muted: #6b7280;
+
+	/* Theme surface variables */
+	--page-bg-light: #FFFBEB;
+	--card-bg-light: #ffffff;
+	--page-bg: rgba(15,23,42,0.6); /* darker page overlay in dark mode */
+	--card-bg: rgba(15,23,42,0.8); /* card surfaces in dark mode */
 }
 
 /* Prevent horizontal overflow caused by wide elements */
@@ -21,4 +27,28 @@ html, body {
 	--surface-light: #0b1220;
 	--surface-dark: #0b1220;
 	--text-light: #e6eef8;
+	/* Ensure page and card vars are defined under .dark too (redundant but explicit) */
+	--page-bg: rgba(15,23,42,0.6);
+	--card-bg: rgba(15,23,42,0.8);
 }
+
+/* Helper utility classes to apply centralized surfaces */
+.page-bg {
+	background-color: var(--page-bg-light);
+}
+.dark .page-bg {
+	background-color: var(--page-bg);
+}
+
+.card-bg {
+	background-color: var(--card-bg-light);
+}
+.dark .card-bg {
+	background-color: var(--card-bg);
+}
+
+/* Smooth background transitions */
+.page-bg, .card-bg {
+	transition: background-color 150ms ease-in-out;
+}
+

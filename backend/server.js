@@ -36,6 +36,10 @@ const corsOptions = {
   allowedHeaders: ['Content-Type','Authorization']
 };
 app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin")
+  next();
+})
 app.use(cookieParser());
 app.use(express.json());
 

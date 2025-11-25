@@ -1,6 +1,7 @@
 const Post = require('../models/Post');
 const { verifyToken } = require('../utils/auth');
 const sanitizeHtml = require('sanitize-html');
+const path = require('path');
 
 const User = require('../models/User');
 const getPosts = async (req, res) => {
@@ -107,7 +108,8 @@ const createPost = async (req, res) => {
     });
     let images = [];
     if (req.files && req.files.length > 0) {
-      images = req.files.map(file => file.path.replace('backend/', ''));
+      // Store only the filename - the frontend will use /uploads/{filename}
+      images = req.files.map(file => path.basename(file.path));
     }
     // Accept tags as comma-separated string or array, filter out empty
     let tagsArray = [];
@@ -161,7 +163,7 @@ const updatePost = async (req, res) => {
     post.tags = tags || post.tags;
     post.status = status || post.status;
     if (req.files && req.files.length > 0) {
-      post.images = req.files.map(file => file.path.replace('backend/', ''));
+      post.images = req.files.map(file => path.basename(file.path));
     }
     await post.save();
     res.json(post);

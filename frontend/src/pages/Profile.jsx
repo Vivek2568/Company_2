@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Loader from '../components/Loader';
 import axios from '../api/axios';
 import { FiEdit2, FiThumbsUp, FiThumbsDown, FiMessageCircle, FiPlusCircle, FiLogOut } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 
 
 const Profile = () => {
@@ -106,7 +107,10 @@ const Profile = () => {
                   <span className="text-slate-400 text-xs">No followers yet</span>
                 ) : (
                   followers.map(f => (
-                    <span key={f._id} className="px-3 py-1 rounded-full bg-slate-200 text-slate-700 text-xs font-semibold">{f.username}</span>
+                    <motion.div key={f._id} whileHover={{ y: -3 }} className="flex items-center gap-2 cursor-pointer px-3 py-1 rounded-full bg-slate-200 text-slate-700 text-xs font-semibold" onClick={() => navigate(`/users/${f._id}`)}>
+                      <img src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${f.username}`} alt="avatar" className="w-5 h-5 rounded-full" />
+                      <span>{f.username}</span>
+                    </motion.div>
                   ))
                 )}
               </div>
@@ -118,7 +122,10 @@ const Profile = () => {
                   <span className="text-slate-400 text-xs">Not following anyone</span>
                 ) : (
                   following.map(f => (
-                    <span key={f._id} className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">{f.username}</span>
+                    <motion.div key={f._id} whileHover={{ y: -3 }} className="flex items-center gap-2 cursor-pointer px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold" onClick={() => navigate(`/users/${f._id}`)}>
+                      <img src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${f.username}`} alt="avatar" className="w-5 h-5 rounded-full" />
+                      <span>{f.username}</span>
+                    </motion.div>
                   ))
                 )}
               </div>
