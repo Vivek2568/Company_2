@@ -70,8 +70,8 @@ const login = async (req, res) => {
     // Set HttpOnly cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'development', // Use secure in production
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production', // Only use secure in production
+      sameSite: 'lax',
       maxAge: 60 * 60 * 1000, // 1 hour
     });
 

@@ -96,10 +96,16 @@ const ToolBar = ({ editor }) => {
 
 // Preview Modal Component
 const PreviewModal = ({ isOpen, onClose, title, content, images, categories, tags, availableCategories, availableTags }) => {
+  // hooks must be called unconditionally at top-level of component
+  const [previewIndex, setPreviewIndex] = useState(0);
+  useEffect(() => {
+    if (isOpen) setPreviewIndex(0);
+  }, [isOpen, images]);
+
   if (!isOpen) return null;
 
   const categoryName = availableCategories.find(c => c._id === categories[0])?.name || 'Uncategorized';
-  const tagNames = tags.map(tId => availableTags.find(t => t._id === tId)?.name || '').filter(Boolean);
+  const tagNames = Array.isArray(tags) ? tags : [];
 
   return (
     <AnimatePresence>
@@ -130,12 +136,30 @@ const PreviewModal = ({ isOpen, onClose, title, content, images, categories, tag
 
           {/* Preview Content */}
           <div className="p-8 space-y-6">
-            {/* Preview Images */}
+            {/* Preview Images - carousel */}
             {images.length > 0 && (
               <div className="space-y-3">
-                {images.map((src, idx) => (
-                  <img key={idx} src={src} alt="preview" className="w-full h-auto rounded-lg shadow-lg" />
-                ))}
+                <div className="relative max-w-xl mx-auto">
+                  <img src={images[previewIndex]} alt={`preview-${previewIndex}`} className="w-full h-64 object-cover rounded-md shadow-lg" />
+                  {images.length > 1 && (
+                    <>
+                      <button onClick={(e) => { e.stopPropagation(); setPreviewIndex(i => (i - 1 + images.length) % images.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/40 p-2 rounded-full shadow">
+                        <span className="material-symbols-outlined">chevron_left</span>
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); setPreviewIndex(i => (i + 1) % images.length); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/40 p-2 rounded-full shadow">
+                        <span className="material-symbols-outlined">chevron_right</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex gap-2 justify-center mt-3">
+                  {images.map((src, idx) => (
+                    <button key={idx} onClick={(e) => { e.stopPropagation(); setPreviewIndex(idx); }} className={`w-16 h-10 overflow-hidden rounded-md ${idx === previewIndex ? 'ring-2 ring-blue-500' : 'opacity-70'}`}>
+                      <img src={src} alt={`thumb-${idx}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -198,17 +222,18 @@ const CreateEditPost = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [categories, setCategories] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [status, setStatus] = useState('draft');
-  const [availableCategories, setAvailableCategories] = useState([]);
-  const [availableTags, setAvailableTags] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(!!id);
+  const [tagInput, setTagInput] = useState('');
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
-  const [showPreview, setShowPreview] = useState(false);
-  const [showTagInput, setShowTagInput] = useState(false);
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
+  const [status, setStatus] = useState('draft');
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [availableTags, setAvailableTags] = useState([]);
   const [tagSearch, setTagSearch] = useState('');
+  const [tags, setTags] = useState([]);
+  const [showPreview, setShowPreview] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // TipTap Editor
   const editor = useEditor({
@@ -243,7 +268,9 @@ const CreateEditPost = () => {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     setImages(files);
-    setImagePreviews(files.map(file => URL.createObjectURL(file)));
+    const previews = files.map(file => URL.createObjectURL(file));
+    setImagePreviews(previews);
+    setCurrentPreviewIndex(0);
   };
 
   const removeImage = (index) => {
@@ -251,12 +278,18 @@ const CreateEditPost = () => {
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
     setImages(newImages);
     setImagePreviews(newPreviews);
+    // adjust preview index if needed
+    setCurrentPreviewIndex(prev => {
+      if (newPreviews.length === 0) return 0;
+      if (prev >= newPreviews.length) return newPreviews.length - 1;
+      return prev;
+    });
   };
 
   useEffect(() => {
     fetchCategories();
-    fetchTags();
     if (id) {
+      setFetchLoading(true);
       fetchPost();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -269,7 +302,8 @@ const CreateEditPost = () => {
       setTitle(post.title);
       setContent(post.content);
       setCategories(post.categories.map(c => c._id));
-      setTags(post.tags.map(t => t._id));
+      // Tags are stored as array, join them with comma
+      setTagInput(Array.isArray(post.tags) ? post.tags.join(', ') : '');
       setStatus(post.status);
     } catch (error) {
       console.error('Error fetching post:', error);
@@ -287,22 +321,6 @@ const CreateEditPost = () => {
       console.error('Error fetching categories:', error);
       toast.error('Failed to load categories');
     }
-  };
-
-  const fetchTags = async () => {
-    try {
-      const response = await axios.get('/api/tags');
-      setAvailableTags(response.data);
-    } catch (error) {
-      console.error('Error fetching tags:', error);
-      toast.error('Failed to load tags');
-    }
-  };
-
-  const handleTagToggle = (tagId) => {
-    setTags(prev => 
-      prev.includes(tagId) ? prev.filter(t => t !== tagId) : [...prev, tagId]
-    );
   };
 
   const handleSubmit = async (e) => {
@@ -335,7 +353,11 @@ const CreateEditPost = () => {
       formData.append('content', content);
       formData.append('status', status);
       formData.append('categories', categories[0]);
-      tags.forEach(tag => formData.append('tags', tag));
+      // Parse comma-separated tags and trim whitespace
+      if (tagInput.trim()) {
+        const tagsArray = tagInput.split(',').map(tag => tag.trim()).filter(Boolean);
+        formData.append('tags', tagsArray.join(','));
+      }
       images.forEach(img => formData.append('images', img));
 
       if (id) {
@@ -367,7 +389,7 @@ const CreateEditPost = () => {
   if (fetchLoading) return <Loader />;
 
   const filteredTags = availableTags.filter(tag =>
-    tag.name.toLowerCase().includes(tagSearch.toLowerCase()) && !tags.includes(tag._id)
+    tag.name.toLowerCase().includes(tagSearch.toLowerCase()) && !tags.includes(tag.name)
   );
 
   return (
@@ -496,26 +518,36 @@ const CreateEditPost = () => {
             ) : (
               <div className="space-y-4">
                 <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">Cover Images</p>
-                {imagePreviews.map((src, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="relative group rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700"
+                <div className="relative max-w-xl mx-auto rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700">
+                  <img src={imagePreviews[currentPreviewIndex]} alt={`preview-${currentPreviewIndex}`} className="w-full h-48 object-cover rounded-md" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(currentPreviewIndex)}
+                    className="absolute top-3 right-3 w-9 h-9 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow"
                   >
-                    <img src={src} alt="preview" className="w-full h-80 object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      type="button"
-                      onClick={() => removeImage(idx)}
-                      className="absolute top-4 right-4 w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
-                    >
-                      <span className="material-symbols-outlined">close</span>
-                    </motion.button>
-                  </motion.div>
-                ))}
+                    <span className="material-symbols-outlined">close</span>
+                  </button>
+                  {imagePreviews.length > 1 && (
+                    <>
+                      <button onClick={(e) => { e.stopPropagation(); setCurrentPreviewIndex(i => (i - 1 + imagePreviews.length) % imagePreviews.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow">
+                        <span className="material-symbols-outlined">chevron_left</span>
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); setCurrentPreviewIndex(i => (i + 1) % imagePreviews.length); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow">
+                        <span className="material-symbols-outlined">chevron_right</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex gap-2 justify-center mt-3">
+                  {imagePreviews.map((src, idx) => (
+                    <button key={idx} onClick={() => setCurrentPreviewIndex(idx)} className={`w-20 h-12 overflow-hidden rounded-md ${idx === currentPreviewIndex ? 'ring-2 ring-blue-500' : 'opacity-80'}`}>
+                      <img src={src} alt={`thumb-${idx}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+
                 <motion.label
                   whileHover={{ scale: 1.02 }}
                   className="block border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all"
@@ -722,86 +754,15 @@ const CreateEditPost = () => {
             transition={{ delay: 0.3 }}
             className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-700"
           >
-            <div className="flex items-center justify-between mb-4">
-              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">Tags</label>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                type="button"
-                onClick={() => setShowTagInput(!showTagInput)}
-                className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
-              >
-                <span className="material-symbols-outlined text-sm">add</span>
-                Add
-              </motion.button>
-            </div>
-
-            {/* Selected Tags */}
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {tags.map(tagId => {
-                  const tag = availableTags.find(t => t._id === tagId);
-                  return tag ? (
-                    <motion.span
-                      key={tagId}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
-                      className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm font-medium flex items-center gap-2 shadow-sm"
-                    >
-                      #{tag.name}
-                      <motion.button
-                        whileHover={{ scale: 1.2 }}
-                        whileTap={{ scale: 0.9 }}
-                        type="button"
-                        onClick={() => handleTagToggle(tagId)}
-                        className="hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-1 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-sm">close</span>
-                      </motion.button>
-                    </motion.span>
-                  ) : null;
-                })}
-              </div>
-            )}
-
-            {/* Tag Input */}
-            <AnimatePresence>
-              {showTagInput && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-3 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700"
-                >
-                  <input
-                    type="text"
-                    value={tagSearch}
-                    onChange={(e) => setTagSearch(e.target.value)}
-                    placeholder="Search tags..."
-                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white bg-white card-bg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div className="flex flex-wrap gap-2">
-                    {filteredTags.map(tag => (
-                      <motion.button
-                        key={tag._id}
-                        whileHover={{ scale: 1.05 }}
-                        type="button"
-                        onClick={() => {
-                          handleTagToggle(tag._id);
-                          setTagSearch('');
-                        }}
-                        className="px-3 py-1 bg-slate-200 card-bg text-slate-700 dark:text-slate-300 rounded-full text-sm hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white transition-all"
-                      >
-                        + {tag.name}
-                      </motion.button>
-                    ))}
-                  </div>
-                  {filteredTags.length === 0 && tagSearch && (
-                    <p className="text-slate-500 dark:text-slate-400 text-sm text-center py-4">No tags found</p>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-3">Tags</label>
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              placeholder="Enter tags separated by comma (e.g., javascript, react, web development)"
+              className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white bg-white card-bg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
+            />
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Separate multiple tags with commas</p>
           </motion.div>
         </motion.form>
       </div>
@@ -814,9 +775,8 @@ const CreateEditPost = () => {
         content={content}
         images={imagePreviews}
         categories={categories}
-        tags={tags}
+        tags={tagInput.split(',').map(t => t.trim()).filter(Boolean)}
         availableCategories={availableCategories}
-        availableTags={availableTags}
       />
     </div>
   );

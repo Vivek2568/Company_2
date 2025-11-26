@@ -21,6 +21,8 @@ const Profile = () => {
       fetchFollowers();
       fetchFollowing();
     }
+    // fetch* functions are stable in this component scope; avoid exhaustive-deps warning
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchUserPosts = async () => {

@@ -20,7 +20,8 @@ const postSchema = new mongoose.Schema({
     ref: 'Category'
   }],
   tags: [{
-    type: String // Accept both ObjectId and plain string tags
+    type: String,
+    trim: true
   }],
   status: {
     type: String,

@@ -1,13 +1,14 @@
 const express = require('express');
 const { body } = require('express-validator');
 const router = express.Router();
-const { getPosts, getPostById, createPost, updatePost, deletePost, likePost } = require('../controllers/postController');
+const { getPosts, getPostById, createPost, updatePost, deletePost, likePost, getRecommendedPosts } = require('../controllers/postController');
 const upload = require('../middlewares/upload');
 const { authenticate } = require('../middlewares/auth');
 const { handleValidation } = require('../middlewares/validation');
 
 
 router.get('/', getPosts);
+router.get('/recommendations', getRecommendedPosts);
 router.get('/:id', getPostById);
 router.post('/', authenticate, upload.array('images', 5), [
   body('title').notEmpty().withMessage('Title is required'),

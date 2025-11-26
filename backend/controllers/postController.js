@@ -6,7 +6,7 @@ const path = require('path');
 const User = require('../models/User');
 const getPosts = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, category, tag, author, followed } = req.query;
+    const { page = 1, limit = 9, search, categories, tags, author, followed } = req.query;
 
     // Determine if the requester is the same as the author (to show drafts)
     let requesterId = null;
@@ -34,28 +34,43 @@ const getPosts = async (req, res) => {
         delete query.status;
       }
     }
+
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
         { content: { $regex: search, $options: 'i' } }
       ];
     }
-    if (category) {
-      query.categories = category;
+
+    // Handle multiple categories (comma-separated)
+    if (categories) {
+      const categoryArray = categories.split(',').filter(c => c.trim());
+      if (categoryArray.length > 0) {
+        query.categories = { $in: categoryArray };
+      }
     }
-    if (tag) {
-      query.tags = tag;
+
+    // Handle multiple tags (comma-separated or array)
+    if (tags) {
+      const tagsArray = Array.isArray(tags) 
+        ? tags.filter(t => typeof t === 'string' && t.trim())
+        : tags.split(',').map(t => t.trim()).filter(Boolean);
+      if (tagsArray.length > 0) {
+        query.tags = { $in: tagsArray };
+      }
     }
+
     if (followed && followingIds.length > 0) {
       query.author = { $in: followingIds };
     }
+
     const posts = await Post.find(query)
       .populate('author', 'username')
       .populate('categories', 'name')
-      .populate('tags', 'name')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
+
     const total = await Post.countDocuments(query);
     res.json({ posts, totalPages: Math.ceil(total / limit), currentPage: page });
   } catch (error) {
@@ -68,8 +83,7 @@ const getPostById = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
       .populate('author', 'username')
-      .populate('categories', 'name')
-      .populate('tags', 'name');
+      .populate('categories', 'name');
 
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
@@ -160,7 +174,17 @@ const updatePost = async (req, res) => {
       }
     }) : post.content;
     post.categories = categories || post.categories;
-    post.tags = tags || post.tags;
+    
+    // Process tags same way as createPost
+    let tagsArray = [];
+    if (Array.isArray(tags)) {
+      tagsArray = tags.filter(t => typeof t === 'string' && t.trim() !== '').map(t => t.trim());
+    } else if (typeof tags === 'string') {
+      tagsArray = tags.split(',').map(t => t.trim()).filter(Boolean);
+    } else if (tags) {
+      tagsArray = Object.values(tags).map(t => String(t).trim()).filter(Boolean);
+    }
+    post.tags = tagsArray.length > 0 ? tagsArray : post.tags;
     post.status = status || post.status;
     if (req.files && req.files.length > 0) {
       post.images = req.files.map(file => path.basename(file.path));
@@ -214,4 +238,53 @@ const likePost = async (req, res) => {
   }
 };
 
-module.exports = { getPosts, getPostById, createPost, updatePost, deletePost, likePost };
+const getRecommendedPosts = async (req, res) => {
+  try {
+    const { postId, limit = 3 } = req.query;
+    
+    // Get current post to get author and categories
+    const currentPost = await Post.findById(postId)
+      .populate('author', '_id')
+      .populate('categories', '_id');
+    
+    if (!currentPost) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Get published posts by same author (excluding current post)
+    const sameAuthorPosts = await Post.find({
+      author: currentPost.author._id,
+      status: 'published',
+      _id: { $ne: postId }
+    })
+      .populate('author', 'username _id')
+      .populate('categories', 'name')
+      .populate('tags', 'name')
+      .sort({ createdAt: -1 })
+      .limit(limit);
+
+    // Get published posts in same categories (excluding current post and posts by same author)
+    const categoryIds = currentPost.categories.map(c => c._id);
+    const sameCategoryPosts = await Post.find({
+      categories: { $in: categoryIds },
+      status: 'published',
+      _id: { $ne: postId },
+      author: { $ne: currentPost.author._id }
+    })
+      .populate('author', 'username _id')
+      .populate('categories', 'name')
+      .populate('tags', 'name')
+      .sort({ createdAt: -1 })
+      .limit(limit);
+
+    res.json({
+      sameAuthor: sameAuthorPosts,
+      sameCategory: sameCategoryPosts
+    });
+  } catch (error) {
+    console.error('getRecommendedPosts error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { getPosts, getPostById, createPost, updatePost, deletePost, likePost, getRecommendedPosts };

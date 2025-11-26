@@ -40,7 +40,7 @@ const Signup = () => {
             uppercase: /[A-Z]/.test(pw),
             lowercase: /[a-z]/.test(pw),
             number: /[0-9]/.test(pw),
-            special: /[!@#$%^&*(),.?"':{}|<>\[\]\\/;_+=~-]/.test(pw),
+            special: /[!@#$%^&*(),.?":{}|<>\/;_+=~-]/.test(pw),
         };
     };
 
