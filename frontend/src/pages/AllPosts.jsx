@@ -105,6 +105,23 @@ const AllPosts = () => {
     setFilterType('explore');
   };
 
+  // Build a window of page numbers to show (with maxButtons visible)
+  const getPageNumbers = () => {
+    const total = totalPages || 1;
+    const maxButtons = 5; // show up to 5 page buttons
+    if (total <= maxButtons) return Array.from({ length: total }, (_, i) => i + 1);
+
+    let start = Math.max(1, page - Math.floor(maxButtons / 2));
+    let end = start + maxButtons - 1;
+
+    if (end > total) {
+      end = total;
+      start = Math.max(1, end - maxButtons + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
+
   const filterOptions = [
     { value: 'explore', label: 'Explore All', icon: FaGlobe },
     ...(user ? [
@@ -425,7 +442,7 @@ const AllPosts = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex justify-center items-center gap-2 mt-8 flex-wrap"
+                className="max-w-3xl mx-auto flex justify-center items-center gap-2 mt-8 flex-wrap"
               >
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -440,39 +457,82 @@ const AllPosts = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setPage(page - 1)}
+                  onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
                   className="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                 >
                   Previous
                 </motion.button>
 
-                <div className="flex gap-1 flex-wrap justify-center">
-                  {[...Array(Math.min(totalPages, 5))].map((_, i) => {
-                    const pageNum = page > 3 ? page + i - 2 : i + 1;
-                    if (pageNum > totalPages) return null;
+                <div className="flex gap-1 items-center flex-wrap justify-center">
+                  {(() => {
+                    const pages = getPageNumbers();
+                    const first = pages[0];
+                    const last = pages[pages.length - 1];
                     return (
-                      <motion.button
-                        key={pageNum}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => setPage(pageNum)}
-                        className={`w-10 h-10 rounded-lg font-semibold transition-all ${
-                          page === pageNum
-                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                            : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600'
-                        }`}
-                      >
-                        {pageNum}
-                      </motion.button>
+                      <>
+                        {first > 1 && (
+                          <>
+                            <motion.button
+                              key={1}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setPage(1)}
+                              className={`w-10 h-10 rounded-lg font-semibold transition-all ${
+                                page === 1
+                                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600'
+                              }`}
+                            >
+                              1
+                            </motion.button>
+                            {first > 2 && <span className="px-2">...</span>}
+                          </>
+                        )}
+
+                        {pages.map((pn) => (
+                          <motion.button
+                            key={pn}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setPage(pn)}
+                            className={`w-10 h-10 rounded-lg font-semibold transition-all ${
+                              page === pn
+                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600'
+                            }`}
+                          >
+                            {pn}
+                          </motion.button>
+                        ))}
+
+                        {last < totalPages && (
+                          <>
+                            {last < totalPages - 1 && <span className="px-2">...</span>}
+                            <motion.button
+                              key={totalPages}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setPage(totalPages)}
+                              className={`w-10 h-10 rounded-lg font-semibold transition-all ${
+                                page === totalPages
+                                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600'
+                              }`}
+                            >
+                              {totalPages}
+                            </motion.button>
+                          </>
+                        )}
+                      </>
                     );
-                  })}
+                  })()}
                 </div>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setPage(page + 1)}
+                  onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
                   className="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                 >

@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from '../api/axios';
 import Loader from '../components/Loader';
+import UserListModal from '../components/UserListModal';
+import StatsCard from '../components/StatsCard';
 import Button from '../components/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaHeart, FaComment, FaEye, FaUser, FaUsers, FaFire, FaPen, FaXmark } from 'react-icons/fa6';
@@ -167,233 +169,94 @@ const UserProfile = () => {
             <div className="md:col-span-2">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                 {/* Total Posts */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="border border-slate-200 rounded-lg p-4 hover:border-slate-300 transition"
-                >
-                  <div className="text-3xl font-bold text-slate-900">{posts.length}</div>
-                  <div className="text-sm text-slate-600 mt-1">Posts</div>
-                </motion.div>
+                <StatsCard
+                  value={posts.length}
+                  label="Posts"
+                  delay={0.1}
+                  textColor="text-slate-900"
+                  isClickable={false}
+                />
 
                 {/* Followers */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="border border-slate-200 rounded-lg p-4 hover:border-slate-300 hover:shadow-md transition cursor-pointer group"
+                <StatsCard
+                  value={followers.length}
+                  label="Followers"
+                  delay={0.2}
+                  textColor="text-blue-600"
+                  isClickable={true}
                   onClick={() => { setShowFollowers(true); setShowFollowing(false); }}
-                >
-                  <div className="text-3xl font-bold text-slate-900 group-hover:text-blue-600 transition">{followers.length}</div>
-                  <div className="text-sm text-slate-600 mt-1 group-hover:text-slate-900 transition">Followers</div>
-                </motion.div>
+                />
 
                 {/* Following */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="border border-slate-200 rounded-lg p-4 hover:border-slate-300 hover:shadow-md transition cursor-pointer group"
+                <StatsCard
+                  value={following.length}
+                  label="Following"
+                  delay={0.3}
+                  textColor="text-blue-600"
+                  isClickable={true}
                   onClick={() => { setShowFollowing(true); setShowFollowers(false); }}
-                >
-                  <div className="text-3xl font-bold text-slate-900 group-hover:text-blue-600 transition">{following.length}</div>
-                  <div className="text-sm text-slate-600 mt-1 group-hover:text-slate-900 transition">Following</div>
-                </motion.div>
+                />
 
                 {/* Claps */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="border border-slate-200 rounded-lg p-4 hover:border-slate-300 transition"
-                >
-                  <div className="text-3xl font-bold text-red-500">{analytics.totalLikes}</div>
-                  <div className="text-sm text-slate-600 mt-1">Claps</div>
-                </motion.div>
+                <StatsCard
+                  value={analytics.totalLikes}
+                  label="Claps"
+                  delay={0.4}
+                  textColor="text-red-500"
+                  isClickable={false}
+                />
 
                 {/* Comments */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="border border-slate-200 rounded-lg p-4 hover:border-slate-300 transition"
-                >
-                  <div className="text-3xl font-bold text-blue-500">{analytics.totalComments}</div>
-                  <div className="text-sm text-slate-600 mt-1">Comments</div>
-                </motion.div>
+                <StatsCard
+                  value={analytics.totalComments}
+                  label="Comments"
+                  delay={0.5}
+                  textColor="text-blue-500"
+                  isClickable={false}
+                />
 
                 {/* Views */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="border border-slate-200 rounded-lg p-4 hover:border-slate-300 transition"
-                >
-                  <div className="text-3xl font-bold text-green-600">{analytics.totalViews}</div>
-                  <div className="text-sm text-slate-600 mt-1">Views</div>
-                </motion.div>
+                <StatsCard
+                  value={analytics.totalViews}
+                  label="Views"
+                  delay={0.6}
+                  textColor="text-green-600"
+                  isClickable={false}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Followers Modal */}
-      <AnimatePresence>
-        {showFollowers && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowFollowers(false)}
-              className="fixed inset-0 bg-black/40 z-40"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-x-4 top-1/2 -translate-y-1/2 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-md max-h-[80vh] bg-white rounded-2xl shadow-2xl z-50 flex flex-col"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl">
-                <h2 className="text-xl font-bold text-slate-900">Followers</h2>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowFollowers(false)}
-                  className="p-2 hover:bg-slate-100 rounded-full transition"
-                >
-                  <FaXmark className="text-slate-600" />
-                </motion.button>
-              </div>
+      {/* Followers/Following Modals */}
+      <UserListModal
+        isOpen={showFollowers}
+        onClose={() => setShowFollowers(false)}
+        title="Followers"
+        emptyIcon={FaUser}
+        emptyTitle="No followers yet"
+        emptySubtitle="Share great content to gain followers"
+        users={followers}
+        onUserClick={(userId) => {
+          navigate(`/users/${userId}`);
+          setShowFollowers(false);
+        }}
+      />
 
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto">
-                {followers.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 px-6">
-                    <FaUser className="text-4xl text-slate-300 mb-3" />
-                    <p className="text-slate-600 font-medium">No followers yet</p>
-                    <p className="text-slate-500 text-sm mt-1">Share great content to gain followers</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-slate-100">
-                    {followers.map((f) => (
-                      <motion.div
-                        key={f._id}
-                        whileHover={{ backgroundColor: '#f8fafc' }}
-                        onClick={() => {
-                          navigate(`/users/${f._id}`);
-                          setShowFollowers(false);
-                        }}
-                        className="p-4 cursor-pointer transition flex items-center justify-between group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${f.username}`}
-                            alt={f.username}
-                            className="w-12 h-12 rounded-full object-cover border border-slate-200"
-                          />
-                          <div className="flex-1">
-                            <p className="font-semibold text-slate-900 group-hover:text-blue-600 transition">{f.username}</p>
-                            <p className="text-xs text-slate-500">@{f.username}</p>
-                          </div>
-                        </div>
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          whileHover={{ opacity: 1 }}
-                          className="text-blue-600 text-sm font-medium"
-                        >
-                          →
-                        </motion.div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Following Modal */}
-      <AnimatePresence>
-        {showFollowing && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowFollowing(false)}
-              className="fixed inset-0 bg-black/40 z-40"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-x-4 top-1/2 -translate-y-1/2 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-md max-h-[80vh] bg-white rounded-2xl shadow-2xl z-50 flex flex-col"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl">
-                <h2 className="text-xl font-bold text-slate-900">Following</h2>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowFollowing(false)}
-                  className="p-2 hover:bg-slate-100 rounded-full transition"
-                >
-                  <FaXmark className="text-slate-600" />
-                </motion.button>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto">
-                {following.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 px-6">
-                    <FaUsers className="text-4xl text-slate-300 mb-3" />
-                    <p className="text-slate-600 font-medium">Not following anyone</p>
-                    <p className="text-slate-500 text-sm mt-1">Follow writers to see their posts</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-slate-100">
-                    {following.map((f) => (
-                      <motion.div
-                        key={f._id}
-                        whileHover={{ backgroundColor: '#f8fafc' }}
-                        onClick={() => {
-                          navigate(`/users/${f._id}`);
-                          setShowFollowing(false);
-                        }}
-                        className="p-4 cursor-pointer transition flex items-center justify-between group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${f.username}`}
-                            alt={f.username}
-                            className="w-12 h-12 rounded-full object-cover border border-slate-200"
-                          />
-                          <div className="flex-1">
-                            <p className="font-semibold text-slate-900 group-hover:text-blue-600 transition">{f.username}</p>
-                            <p className="text-xs text-slate-500">@{f.username}</p>
-                          </div>
-                        </div>
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          whileHover={{ opacity: 1 }}
-                          className="text-blue-600 text-sm font-medium"
-                        >
-                          →
-                        </motion.div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <UserListModal
+        isOpen={showFollowing}
+        onClose={() => setShowFollowing(false)}
+        title="Following"
+        emptyIcon={FaUsers}
+        emptyTitle="Not following anyone"
+        emptySubtitle="Follow writers to see their posts"
+        users={following}
+        onUserClick={(userId) => {
+          navigate(`/users/${userId}`);
+          setShowFollowing(false);
+        }}
+      />
 
 
       {/* Top Post Highlight */}

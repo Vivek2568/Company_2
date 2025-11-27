@@ -16,7 +16,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-<nav style={{ backgroundColor: '#FFFBEB' }} className="sticky top-0 z-50 w-full bg-[#FFFBEB]">
+    <nav style={{ backgroundColor: '#FFFBEB' }} className="sticky top-0 z-50 w-full bg-[#FFFBEB]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
 
         {/* Logo */}
@@ -36,19 +36,7 @@ const Navbar = () => {
           <Link className="text-lg font-semibold text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" to="/create-post">Post</Link>
           <Link className="text-lg font-semibold text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" to="/profile">Profile</Link>
 
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            style={{ backgroundColor: 'transparent' }}
-            className="p-2 rounded-full bg-transparent hover:bg-white/5 dark:hover:bg-black/10 transition"
-            aria-label="Toggle theme"
-          >
-            {theme === 'light' ? (
-              <span role="img" aria-label="moon">🌙</span>
-            ) : (
-              <span role="img" aria-label="sun">☀️</span>
-            )}
-          </button>
+
 
           {/* Auth Buttons */}
           {!user ? (

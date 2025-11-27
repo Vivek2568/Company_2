@@ -4,6 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import Loader from '../components/Loader';
+import EditorToolbar from '../components/EditorToolbar';
+import PreviewModal from '../components/PreviewModal';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -14,198 +16,10 @@ import Underline from '@tiptap/extension-underline';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { toast } from 'react-toastify';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import { FaBold, FaItalic, FaUnderline, FaHeading, FaList, FaQuoteLeft, FaCode, FaLink, FaArrowLeft, FaEye, FaCheck, FaUpload, FaChevronLeft, FaChevronRight, FaXmark, FaSpinner, FaImage } from 'react-icons/fa6';
+import { FaArrowLeft, FaEye, FaCheck, FaChevronLeft, FaChevronRight, FaXmark, FaSpinner, FaImage } from 'react-icons/fa6';
 
-const ToolBar = ({ editor }) => {
-  if (!editor) return null;
-
-  const toolGroups = [
-    {
-      label: 'Text',
-      tools: [
-        { icon: FaBold, tooltip: 'Bold (Ctrl+B)', action: () => editor.chain().focus().toggleBold().run(), active: editor.isActive('bold') },
-        { icon: FaItalic, tooltip: 'Italic (Ctrl+I)', action: () => editor.chain().focus().toggleItalic().run(), active: editor.isActive('italic') },
-        { icon: FaUnderline, tooltip: 'Underline', action: () => editor.chain().focus().toggleUnderline().run(), active: editor.isActive('underline') },
-      ]
-    },
-    {
-      label: 'Heading',
-      tools: [
-        { label: 'H1', tooltip: 'Heading 1', action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(), active: editor.isActive('heading', { level: 1 }) },
-        { label: 'H2', tooltip: 'Heading 2', action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(), active: editor.isActive('heading', { level: 2 }) },
-        { label: 'H3', tooltip: 'Heading 3', action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(), active: editor.isActive('heading', { level: 3 }) },
-      ]
-    },
-    {
-      label: 'List',
-      tools: [
-        { icon: FaList, tooltip: 'Bullet List', action: () => editor.chain().focus().toggleBulletList().run(), active: editor.isActive('bulletList') },
-        { icon: FaList, tooltip: 'Numbered List', action: () => editor.chain().focus().toggleOrderedList().run(), active: editor.isActive('orderedList') },
-      ]
-    },
-    {
-      label: 'Quote',
-      tools: [
-        { icon: FaQuoteLeft, tooltip: 'Quote', action: () => editor.chain().focus().toggleBlockquote().run(), active: editor.isActive('blockquote') },
-        { icon: FaCode, tooltip: 'Code Block', action: () => editor.chain().focus().toggleCodeBlock().run(), active: editor.isActive('codeBlock') },
-      ]
-    },
-    {
-      label: 'Link',
-      tools: [
-        { icon: FaLink, tooltip: 'Add Link', action: () => {
-          const url = window.prompt('Enter URL:');
-          if (url) editor.chain().focus().setLink({ href: url }).run();
-        }, active: editor.isActive('link') },
-      ]
-    }
-  ];
-
-  return (
-    <div className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 p-4 flex flex-wrap gap-4 sticky top-0 z-40">
-      {toolGroups.map((group, idx) => (
-        <div key={idx} className="flex items-center gap-2">
-          <div className="flex gap-1 p-2 bg-white card-bg rounded-lg border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md transition-shadow">
-            {group.tools.map((tool, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={tool.action}
-                title={tool.tooltip}
-                className={clsx(
-                  'p-2 rounded transition-all duration-200',
-                  tool.active
-                    ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-600'
-                )}
-              >
-                {tool.icon ? (
-                  <tool.icon className="text-lg" />
-                ) : (
-                  <span className="text-xs font-bold">{tool.label}</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// Preview Modal Component
-const PreviewModal = ({ isOpen, onClose, title, content, images, categories, tags, availableCategories, availableTags }) => {
-  // hooks must be called unconditionally at top-level of component
-  const [previewIndex, setPreviewIndex] = useState(0);
-  useEffect(() => {
-    if (isOpen) setPreviewIndex(0);
-  }, [isOpen, images]);
-
-  if (!isOpen) return null;
-
-  const categoryName = availableCategories.find(c => c._id === categories[0])?.name || 'Uncategorized';
-  const tagNames = Array.isArray(tags) ? tags : [];
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          onClick={e => e.stopPropagation()}
-          className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        >
-          {/* Preview Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-slate-900 to-slate-800 text-white p-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Preview</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-            >
-              <FaXmark className="text-xl" />
-            </button>
-          </div>
-
-          {/* Preview Content */}
-          <div className="p-8 space-y-6">
-            {/* Preview Images - carousel */}
-            {images.length > 0 && (
-              <div className="space-y-3">
-                <div className="relative max-w-xl mx-auto">
-                  <img src={images[previewIndex]} alt={`preview-${previewIndex}`} className="w-full h-64 object-cover rounded-md shadow-lg" />
-                  {images.length > 1 && (
-                    <>
-                      <button onClick={(e) => { e.stopPropagation(); setPreviewIndex(i => (i - 1 + images.length) % images.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/40 p-2 rounded-full shadow">
-                        <FaChevronLeft className="text-xl" />
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); setPreviewIndex(i => (i + 1) % images.length); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/40 p-2 rounded-full shadow">
-                        <FaChevronRight className="text-xl" />
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                <div className="flex gap-2 justify-center mt-3">
-                  {images.map((src, idx) => (
-                    <button key={idx} onClick={(e) => { e.stopPropagation(); setPreviewIndex(idx); }} className={`w-16 h-10 overflow-hidden rounded-md ${idx === previewIndex ? 'ring-2 ring-blue-500' : 'opacity-70'}`}>
-                      <img src={src} alt={`thumb-${idx}`} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Title */}
-            <div>
-              <h1 className="text-4xl font-bold text-slate-900 mb-4">{title || 'Untitled Post'}</h1>
-              <div className="flex items-center gap-3 text-sm text-slate-600">
-                <span className="px-3 py-1 bg-slate-100 rounded-full">{categoryName}</span>
-              </div>
-            </div>
-
-            {/* Tags */}
-            {tagNames.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {tagNames.map((tag, idx) => (
-                  <span key={idx} className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-slate-700 rounded-full text-sm font-medium">
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Divider */}
-            <hr className="my-6 border-slate-200" />
-
-            {/* Content Preview */}
-            <div
-              className="prose prose-lg max-w-none
-                prose-headings:text-slate-900 prose-headings:font-bold
-                prose-p:text-slate-700 prose-p:leading-relaxed
-                prose-a:text-blue-600 prose-a:underline
-                prose-strong:font-bold prose-strong:text-slate-900
-                prose-em:text-slate-700
-                prose-code:bg-slate-100 prose-code:text-slate-800 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
-                prose-blockquote:border-l-4 prose-blockquote:border-slate-400 prose-blockquote:pl-4 prose-blockquote:italic
-                prose-li:text-slate-700
-              "
-              dangerouslySetInnerHTML={{ __html: content }}
-            />
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-};
 
 const CreateEditPost = () => {
   const { id } = useParams();
@@ -574,7 +388,7 @@ const CreateEditPost = () => {
             transition={{ delay: 0.2 }}
             className="rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 bg-white card-bg"
           >
-            <ToolBar editor={editor} />
+            <EditorToolbar editor={editor} />
             <EditorContent
               editor={editor}
               className="text-editor-content bg-[#FFFBEB] page-bg"
