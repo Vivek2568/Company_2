@@ -5,6 +5,7 @@ import Loader from '../components/Loader';
 import Comments from '../components/Comments';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import { FaArrowLeft, FaHeart, FaComment, FaChevronLeft, FaChevronRight, FaCircleNotch } from 'react-icons/fa6';
 
 const SinglePost = () => {
   const { id } = useParams();
@@ -16,6 +17,7 @@ const SinglePost = () => {
   const [commentsCount, setCommentsCount] = useState(0);
   const [recommendedPosts, setRecommendedPosts] = useState({ sameAuthor: [], sameCategory: [] });
   const [recommendedLoading, setRecommendedLoading] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -41,6 +43,11 @@ const SinglePost = () => {
     };
     fetchPost();
   }, [id]);
+
+  useEffect(() => {
+    // reset carousel index when post or images change
+    setCurrentImageIndex(0);
+  }, [post?.images]);
 
   const handleLike = async () => {
     try {
@@ -70,11 +77,11 @@ const SinglePost = () => {
         className="text-center max-w-md mx-4"
       >
         <motion.span
-          className="material-symbols-outlined text-6xl text-slate-400 dark:text-slate-600 mb-4 inline-block"
+          className="text-6xl text-slate-400 dark:text-slate-600 mb-4 inline-block"
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          error_outline
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-16 h-16"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         </motion.span>
         <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">Post not found</h2>
         <p className="text-slate-600 dark:text-slate-400 mb-6">Sorry, the post you are looking for does not exist.</p>
@@ -90,9 +97,7 @@ const SinglePost = () => {
     </div>
   );
 
-  const imageUrl = post.images?.[0]
-    ? `http://localhost:5000/uploads/${post.images[0]}`
-    : post.thumbnail;
+  
 
   return (
     <div className="min-h-screen bg-[#FFFBEB] page-bg">
@@ -102,13 +107,13 @@ const SinglePost = () => {
         animate={{ y: 0, opacity: 1 }}
         className="border-b border-slate-200 dark:border-slate-700 bg-[#FFFBEB] page-bg sticky top-0 z-40 shadow-sm"
       >
-        <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
           <motion.button
             whileHover={{ x: -4 }}
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors font-medium text-sm"
           >
-            <span className="material-symbols-outlined text-xl">arrow_back</span>
+            <FaArrowLeft className="text-lg" />
             <span>Back</span>
           </motion.button>
         </div>
@@ -168,9 +173,7 @@ const SinglePost = () => {
                 className="flex items-center gap-1 px-2 py-1 rounded-full hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors group"
                 title="Like"
               >
-                <span className="material-symbols-outlined text-lg text-slate-600 dark:text-slate-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors">
-                  favorite
-                </span>
+                <FaHeart className="text-lg text-slate-600 dark:text-slate-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors" />
                 <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{formatCount(likes)}</span>
               </motion.button>
 
@@ -181,9 +184,7 @@ const SinglePost = () => {
                 className="flex items-center gap-1 px-2 py-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors group"
                 title="Comments"
               >
-                <span className="material-symbols-outlined text-lg text-slate-600 dark:text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
-                  chat_bubble
-                </span>
+                <FaComment className="text-lg text-slate-600 dark:text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" />
                 <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{formatCount(commentsCount)}</span>
               </motion.button>
             </div>
@@ -203,6 +204,35 @@ const SinglePost = () => {
               transition={{ delay: 0.2 }}
               className="bg-white card-bg rounded-2xl p-8 sm:p-10 lg:p-12 mb-8 shadow-sm border border-slate-200 dark:border-slate-700"
             >
+              {/* If post has images, render a larger image with side nav buttons */}
+              {post.images && post.images.length > 0 && (
+                <div className="mb-6">
+                  <div className="relative max-w-full mx-auto rounded-lg overflow-hidden shadow-lg">
+                    <img src={`http://localhost:5000/uploads/${post.images[currentImageIndex]}`} alt={post.title} className="w-full h-96 object-cover rounded-md" />
+
+                    {post.images.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setCurrentImageIndex(i => (i - 1 + post.images.length) % post.images.length)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-black/40 p-2 rounded-full shadow"
+                          aria-label="Previous image"
+                        >
+                          <FaChevronLeft className="text-lg" />
+                        </button>
+
+                        <button
+                          onClick={() => setCurrentImageIndex(i => (i + 1) % post.images.length)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-black/40 p-2 rounded-full shadow"
+                          aria-label="Next image"
+                        >
+                          <FaChevronRight className="text-lg" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div
                 className="prose prose-lg dark:prose-invert max-w-none text-slate-700 dark:text-slate-100
                   prose-headings:font-bold prose-headings:text-slate-900 dark:prose-headings:text-white
@@ -221,24 +251,6 @@ const SinglePost = () => {
                   prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:overflow-x-auto prose-pre:rounded-xl"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
-              {/* If post has images, insert a small carousel at the top of content */}
-              {post.images && post.images.length > 0 && (
-                <div className="mt-6 mb-6">
-                  <div className="relative max-w-full mx-auto rounded-lg overflow-hidden shadow-lg">
-                    <img src={`http://localhost:5000/uploads/${post.images[0]}`} alt={post.title} className="w-full h-48 object-cover rounded-md" />
-                    {post.images.length > 1 && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-                        <button onClick={() => { /* client-side carousel could be added later */ }} className="bg-white/90 p-2 rounded-full shadow">
-                          <span className="material-symbols-outlined">chevron_left</span>
-                        </button>
-                        <button onClick={() => {}} className="bg-white/90 p-2 rounded-full shadow">
-                          <span className="material-symbols-outlined">chevron_right</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </motion.div>
               {post.tags && post.tags.length > 0 && (
               <motion.div

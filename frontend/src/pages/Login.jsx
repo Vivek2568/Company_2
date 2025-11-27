@@ -18,7 +18,7 @@ const Login = () => {
         const result = await login({ email, password });
         setLoading(false);
         if (result.ok) {
-            navigate('/');
+            navigate('/posts');
         } else {
             const err = result.error || 'Login failed';
             toast.error(err);

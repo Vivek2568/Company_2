@@ -4,14 +4,14 @@
 
 :root {
 	--primary: #6366F1;
-	--warm-bg: #FFFBEB;
+	--warm-bg: #ffffff;
 	--surface-light: #ffffff;
 	--surface-dark: #0b1220;
 	--text-light: #0f172a;
 	--text-muted: #6b7280;
 
 	/* Theme surface variables */
-	--page-bg-light: #FFFBEB;
+	--page-bg-light: #ffffff;
 	--card-bg-light: #ffffff;
 	--page-bg: rgba(15,23,42,0.6); /* darker page overlay in dark mode */
 	--card-bg: rgba(15,23,42,0.8); /* card surfaces in dark mode */

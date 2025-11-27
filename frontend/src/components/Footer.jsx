@@ -54,7 +54,7 @@ const Footer = () => {
     <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between gap-8">
       {/* Column 1: Logo & Description */}
       <div className="md:w-1/4 flex flex-col items-start">
-        <span className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">Blogify</span>
+        <span className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">VlogSite</span>
         <p className="text-slate-700 text-sm leading-relaxed">
           Blogify is a modern platform to share your stories, ideas, and expertise with the world. <br />
           Discover, write, and connect with a vibrant community of creators.
@@ -65,13 +65,7 @@ const Footer = () => {
         <h3 className="text-lg font-semibold text-slate-900 mb-3">Quick Links</h3>
         <ul className="space-y-2">
           <li>
-            <a href="/" className="text-slate-700 hover:text-green-600 transition-all">Home</a>
-          </li>
-          <li>
-            <a href="/blogs" className="text-slate-700 hover:text-green-600 transition-all">Blogs</a>
-          </li>
-          <li>
-            <a href="/categories" className="text-slate-700 hover:text-green-600 transition-all">Categories</a>
+            <a href="/post" className="text-slate-700 hover:text-green-600 transition-all">Home</a>
           </li>
           <li>
             <a href="/about" className="text-slate-700 hover:text-green-600 transition-all">About</a>
@@ -91,14 +85,12 @@ const Footer = () => {
           <li>
             <a href="/signup" className="text-slate-700 hover:text-green-600 transition-all">Signup</a>
           </li>
-          <li>
-            <a href="/dashboard" className="text-slate-700 hover:text-green-600 transition-all" onClick={handleProtectedClick}>Dashboard</a>
-          </li>
+          
           <li>
             <a href="/profile" className="text-slate-700 hover:text-green-600 transition-all" onClick={handleProtectedClick}>Profile</a>
           </li>
           <li>
-            <a href="/create" className="text-slate-700 hover:text-green-600 transition-all" onClick={handleProtectedClick}>Write Post</a>
+            <a href="/create-post" className="text-slate-700 hover:text-green-600 transition-all" onClick={handleProtectedClick}>Write Post</a>
           </li>
         </ul>
       </nav>

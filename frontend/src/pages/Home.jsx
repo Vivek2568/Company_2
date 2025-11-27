@@ -3,6 +3,7 @@ import axios from "../api/axios";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import { useAuth } from "../context/AuthContext";
+import { FaHeart, FaComment, FaArrowRight, FaArrowLeft } from "react-icons/fa6";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -119,7 +120,7 @@ return (
           </div>
           <div className="flex w-full max-w-lg flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
             <Link
-              to="/create"
+              to="/create-post"
               className="flex h-12 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#FFD84D] px-6 text-base font-bold leading-normal tracking-[0.015em] text-slate-900 transition-transform hover:scale-105"
             >
               Get Started
@@ -224,12 +225,12 @@ return (
                   </div>
 
                   {/* Title */}
-                  <h3 className="line-clamp-2 text-xl font-bold leading-tight text-[#0e141b] transition-colors group-hover:text-blue-600 dark:text-slate-50 dark:group-hover:text-blue-400">
+                  <h3 className="line-clamp-2 text-xl font-bold leading-tight text-[#0e141b] transition-colors group-hover:text-blue-600 dark:text-slate-50 dark:group-hover:text-blue-400" style={{ fontFamily: 'Georgia, serif' }}>
                     {post.title}
                   </h3>
 
                   {/* Excerpt */}
-                  <p className="line-clamp-3 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  <p className="line-clamp-3 flex-1 text-base leading-relaxed text-slate-600 dark:text-slate-300" style={{ fontFamily: 'Georgia, serif' }}>
                     {post.excerpt || post.content.replace(/<[^>]+>/g, "").slice(0, 150) + "..."}
                   </p>
 
@@ -240,18 +241,14 @@ return (
                         onClick={(e) => handleLike(e, post)}
                         className="flex items-center gap-1 text-xs transition-colors hover:text-red-500"
                       >
-                        <span className="material-symbols-outlined text-base">
-                          favorite
-                        </span>
+                        <FaHeart className="text-base" />
                         <span>{formatCount(post.likes ? post.likes.length : 0)}</span>
                       </button>
                       <button
                         onClick={(e) => handleCommentClick(e, post)}
                         className="flex items-center gap-1 text-xs transition-colors hover:text-blue-500"
                       >
-                        <span className="material-symbols-outlined text-base">
-                          chat_bubble
-                        </span>
+                        <FaComment className="text-base" />
                         <span>{formatCount(commentsCount[post._id] || 0)}</span>
                       </button>
                     </div>
@@ -261,9 +258,7 @@ return (
                       className="flex items-center gap-1 text-xs font-semibold text-[#0e141b] transition-colors hover:text-blue-600 dark:text-slate-50"
                     >
                       Read more
-                      <span className="material-symbols-outlined text-base">
-                        arrow_forward
-                      </span>
+                      <FaArrowRight className="text-base" />
                     </Link>
                   </div>
                 </div>
@@ -279,7 +274,7 @@ return (
               onClick={() => setPage(page - 1)}
               className="flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-slate-800"
             >
-              <span className="material-symbols-outlined text-lg">arrow_back</span>
+              <FaArrowLeft className="text-lg" />
               Previous
             </button>
           )}
@@ -289,7 +284,7 @@ return (
               className="flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-slate-800"
             >
               Next
-              <span className="material-symbols-outlined text-lg">arrow_forward</span>
+              <FaArrowRight className="text-lg" />
             </button>
           )}
         </div>
@@ -308,7 +303,7 @@ return (
         </p>
         <div className="flex justify-center">
           <Link
-            to="/register"
+            to="/signup"
             className="flex h-12 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#FFD84D] px-6 text-base font-bold leading-normal tracking-[0.015em] text-slate-900 transition-transform hover:scale-105"
           >
             Sign Up Now

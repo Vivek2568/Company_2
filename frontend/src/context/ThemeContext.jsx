@@ -11,15 +11,25 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  // Force light theme only. Keep API (toggleTheme) as a no-op so components
+  // that call it won't break, but dark mode will never be applied.
+  const theme = 'light';
 
   useEffect(() => {
-    document.documentElement.className = theme;
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+    // Ensure `.dark` class is removed if present and do not add it.
+    document.documentElement.classList.remove('dark');
+    // keep a light marker if needed
+    document.documentElement.classList.add('light');
+    try {
+      localStorage.setItem('theme', 'light');
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, []);
 
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    // no-op: theme toggling disabled to enforce consistent light UI
+    return;
   };
 
   return (

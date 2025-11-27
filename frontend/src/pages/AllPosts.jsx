@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Loader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaFilter, FaTags, FaMagnifyingGlass, FaXmark, FaSpinner, FaFileLines, FaChevronLeft, FaChevronRight, FaBars, FaGlobe, FaUser, FaUsers, FaFolderOpen } from 'react-icons/fa6';
 
 const AllPosts = () => {
   const { user } = useAuth();
@@ -105,10 +106,10 @@ const AllPosts = () => {
   };
 
   const filterOptions = [
-    { value: 'explore', label: 'Explore All', icon: 'explore' },
+    { value: 'explore', label: 'Explore All', icon: FaGlobe },
     ...(user ? [
-      { value: 'yourPosts', label: 'Your Posts', icon: 'article' },
-      { value: 'following', label: 'Following', icon: 'people' }
+      { value: 'yourPosts', label: 'Your Posts', icon: FaUser },
+      { value: 'following', label: 'Following', icon: FaUsers }
     ] : [])
   ];
 
@@ -131,7 +132,7 @@ const AllPosts = () => {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg"
             >
-              <span className="material-symbols-outlined">menu</span>
+              <FaBars className="text-lg" />
             </button>
           </div>
         </div>
@@ -151,33 +152,36 @@ const AllPosts = () => {
             {/* Filter Type (minimal) */}
             <div>
               <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined">filter_list</span>
+                <FaFilter className="text-base" />
                 Feed Type
               </h2>
               <div className="flex flex-col">
-                {filterOptions.map(option => (
-                  <button
-                    key={option.value}
-                    onClick={() => {
-                      setFilterType(option.value);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full text-left flex items-center gap-3 py-2 px-1 transition-colors ${
-                      filterType === option.value
-                        ? 'text-blue-600 font-semibold'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                    }`}>
-                    <span className="material-symbols-outlined text-base">{option.icon}</span>
-                    <span className="text-sm">{option.label}</span>
-                  </button>
-                ))}
+                {filterOptions.map(option => {
+                  const IconComponent = option.icon;
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setFilterType(option.value);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full text-left flex items-center gap-3 py-2 px-1 transition-colors ${
+                        filterType === option.value
+                          ? 'text-blue-600 font-semibold'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                      }`}>
+                      <IconComponent className="text-base" />
+                      <span className="text-sm">{option.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Categories Filter (minimal) */}
             <div>
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined">category</span>
+                <FaFolderOpen className="text-base" />
                 Categories
               </h3>
               <div className="max-h-64 overflow-y-auto">
@@ -207,7 +211,7 @@ const AllPosts = () => {
             {/* Tags Filter (user input - comma separated) */}
             <div>
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined">label</span>
+                <FaTags className="text-base" />
                 Tags
               </h3>
               <div>
@@ -231,7 +235,7 @@ const AllPosts = () => {
                 onClick={clearFilters}
                 className="w-full px-4 py-2 bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 rounded-lg font-medium hover:bg-rose-200 dark:hover:bg-rose-900/50 transition-colors flex items-center justify-center gap-2"
               >
-                <span className="material-symbols-outlined">clear</span>
+                <FaXmark className="text-lg" />
                 Clear Filters
               </motion.button>
             )}
@@ -247,7 +251,7 @@ const AllPosts = () => {
             {/* Search Bar */}
             <div className="p-0">
               <div className="w-full lg:w-1/2 max-w-md border border-slate-200 dark:border-slate-700 rounded-md px-3 py-2 flex items-center gap-2 bg-white/60 dark:bg-slate-800/60">
-                <span className="material-symbols-outlined text-slate-500 dark:text-slate-400">search</span>
+                <FaMagnifyingGlass className="text-slate-500 dark:text-slate-400" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -285,7 +289,7 @@ const AllPosts = () => {
                         className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                       >
                         {cat.name}
-                        <span className="material-symbols-outlined text-sm">close</span>
+                        <FaXmark className="text-sm" />
                       </motion.button>
                     ) : null;
                   })}
@@ -299,7 +303,7 @@ const AllPosts = () => {
                       className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
                     >
                       #{tagName}
-                      <span className="material-symbols-outlined text-sm">close</span>
+                      <FaXmark className="text-sm" />
                     </motion.button>
                   ))}
                 </motion.div>
@@ -317,9 +321,7 @@ const AllPosts = () => {
                   className="flex justify-center items-center py-12"
                 >
                   <div className="text-center">
-                    <span className="material-symbols-outlined text-5xl text-slate-400 dark:text-slate-600 animate-spin">
-                      refresh
-                    </span>
+                    <FaSpinner className="text-5xl text-slate-400 dark:text-slate-600 animate-spin mx-auto" />
                     <p className="mt-2 text-slate-600 dark:text-slate-400">Loading posts...</p>
                   </div>
                 </motion.div>
@@ -331,8 +333,8 @@ const AllPosts = () => {
                   exit={{ opacity: 0, y: -20 }}
                   className="text-center py-12"
                 >
-                  <span className="material-symbols-outlined text-6xl text-slate-400 dark:text-slate-600 block mb-4">
-                    article
+                  <span className="text-6xl text-slate-400 dark:text-slate-600 block mb-4">
+                    <FaFileLines className="text-6xl" />
                   </span>
                   <h3 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-2">
                     No posts found
@@ -387,7 +389,7 @@ const AllPosts = () => {
                           </Link>
 
                           {/* Excerpt + read more */}
-                          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3">
+                          <p className="text-base text-slate-600 dark:text-slate-400 line-clamp-3">
                             {post.excerpt || (post.content && post.content.replace(/<[^>]+>/g, '').slice(0, 220))}
                           </p>
                         </div>

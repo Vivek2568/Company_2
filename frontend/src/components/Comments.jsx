@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
+import { FaHeart, FaRegHeart, FaReply, FaTrash, FaSpinner, FaComment, FaXmark } from 'react-icons/fa6';
 
 const CommentItem = ({ comment, onDelete, onLike, onReply, currentUser }) => {
   const isAuthor = currentUser && comment.userId?._id === currentUser._id;
@@ -54,9 +55,7 @@ const CommentItem = ({ comment, onDelete, onLike, onReply, currentUser }) => {
                   : 'text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400'
               }`}
             >
-              <span className="material-symbols-outlined text-base">
-                {isLiked ? 'favorite' : 'favorite_border'}
-              </span>
+              {isLiked ? <FaHeart className="text-base" /> : <FaRegHeart className="text-base" />}
               <span>{comment.likes?.length || 0}</span>
             </motion.button>
 
@@ -66,7 +65,7 @@ const CommentItem = ({ comment, onDelete, onLike, onReply, currentUser }) => {
               onClick={() => onReply(comment._id)}
               className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
             >
-              <span className="material-symbols-outlined text-base">reply</span>
+              <FaReply className="text-base" />
               <span>Reply</span>
             </motion.button>
 
@@ -77,7 +76,7 @@ const CommentItem = ({ comment, onDelete, onLike, onReply, currentUser }) => {
                 onClick={() => onDelete(comment._id)}
                 className="flex items-center gap-1 text-sm text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors ml-auto"
               >
-                <span className="material-symbols-outlined text-base">delete</span>
+                <FaTrash className="text-base" />
                 <span>Delete</span>
               </motion.button>
             )}
@@ -216,7 +215,7 @@ const Comments = ({ postId }) => {
         >
           {replyTo && (
             <div className="mb-4 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
-              <span className="material-symbols-outlined text-base">reply</span>
+              <FaReply className="text-base" />
               <span>Replying to comment</span>
               <button
                 type="button"
@@ -226,7 +225,7 @@ const Comments = ({ postId }) => {
                 }}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 ml-auto"
               >
-                <span className="material-symbols-outlined text-base">close</span>
+                <FaXmark className="text-base" />
               </button>
             </div>
           )}
@@ -303,7 +302,7 @@ const Comments = ({ postId }) => {
           className="flex justify-center py-12"
         >
           <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-            <span className="material-symbols-outlined animate-spin">refresh</span>
+            <span className="text-lg animate-spin"><FaSpinner className="inline" /></span>
             <span>Loading comments...</span>
           </div>
         </motion.div>
@@ -316,7 +315,7 @@ const Comments = ({ postId }) => {
               transition={{ duration: 0.3 }}
               className="text-center py-12"
             >
-              <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 mb-3 block">chat_bubble_outline</span>
+              <span className="text-5xl text-slate-300 dark:text-slate-600 mb-3 block"><FaComment className="text-5xl mx-auto" /></span>
               <p className="text-slate-500 dark:text-slate-400">No comments yet. Be the first to comment!</p>
             </motion.div>
           ) : (

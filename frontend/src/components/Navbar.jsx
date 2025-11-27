@@ -16,7 +16,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-<nav style={{ backgroundColor: 'transparent' }} className="sticky top-0 z-50 w-full bg-transparent">
+<nav style={{ backgroundColor: '#FFFBEB' }} className="sticky top-0 z-50 w-full bg-[#FFFBEB]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
 
         {/* Logo */}

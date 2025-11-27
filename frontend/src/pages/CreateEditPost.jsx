@@ -16,6 +16,7 @@ import { Color } from '@tiptap/extension-color';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
+import { FaBold, FaItalic, FaUnderline, FaHeading, FaList, FaQuoteLeft, FaCode, FaLink, FaArrowLeft, FaEye, FaCheck, FaUpload, FaChevronLeft, FaChevronRight, FaXmark, FaSpinner, FaImage } from 'react-icons/fa6';
 
 const ToolBar = ({ editor }) => {
   if (!editor) return null;
@@ -24,9 +25,9 @@ const ToolBar = ({ editor }) => {
     {
       label: 'Text',
       tools: [
-        { icon: 'format_bold', tooltip: 'Bold (Ctrl+B)', action: () => editor.chain().focus().toggleBold().run(), active: editor.isActive('bold') },
-        { icon: 'format_italic', tooltip: 'Italic (Ctrl+I)', action: () => editor.chain().focus().toggleItalic().run(), active: editor.isActive('italic') },
-        { icon: 'format_underlined', tooltip: 'Underline', action: () => editor.chain().focus().toggleUnderline().run(), active: editor.isActive('underline') },
+        { icon: FaBold, tooltip: 'Bold (Ctrl+B)', action: () => editor.chain().focus().toggleBold().run(), active: editor.isActive('bold') },
+        { icon: FaItalic, tooltip: 'Italic (Ctrl+I)', action: () => editor.chain().focus().toggleItalic().run(), active: editor.isActive('italic') },
+        { icon: FaUnderline, tooltip: 'Underline', action: () => editor.chain().focus().toggleUnderline().run(), active: editor.isActive('underline') },
       ]
     },
     {
@@ -40,21 +41,21 @@ const ToolBar = ({ editor }) => {
     {
       label: 'List',
       tools: [
-        { icon: 'format_list_bulleted', tooltip: 'Bullet List', action: () => editor.chain().focus().toggleBulletList().run(), active: editor.isActive('bulletList') },
-        { icon: 'format_list_numbered', tooltip: 'Numbered List', action: () => editor.chain().focus().toggleOrderedList().run(), active: editor.isActive('orderedList') },
+        { icon: FaList, tooltip: 'Bullet List', action: () => editor.chain().focus().toggleBulletList().run(), active: editor.isActive('bulletList') },
+        { icon: FaList, tooltip: 'Numbered List', action: () => editor.chain().focus().toggleOrderedList().run(), active: editor.isActive('orderedList') },
       ]
     },
     {
       label: 'Quote',
       tools: [
-        { icon: 'format_quote', tooltip: 'Quote', action: () => editor.chain().focus().toggleBlockquote().run(), active: editor.isActive('blockquote') },
-        { icon: 'code', tooltip: 'Code Block', action: () => editor.chain().focus().toggleCodeBlock().run(), active: editor.isActive('codeBlock') },
+        { icon: FaQuoteLeft, tooltip: 'Quote', action: () => editor.chain().focus().toggleBlockquote().run(), active: editor.isActive('blockquote') },
+        { icon: FaCode, tooltip: 'Code Block', action: () => editor.chain().focus().toggleCodeBlock().run(), active: editor.isActive('codeBlock') },
       ]
     },
     {
       label: 'Link',
       tools: [
-        { icon: 'link', tooltip: 'Add Link', action: () => {
+        { icon: FaLink, tooltip: 'Add Link', action: () => {
           const url = window.prompt('Enter URL:');
           if (url) editor.chain().focus().setLink({ href: url }).run();
         }, active: editor.isActive('link') },
@@ -81,7 +82,7 @@ const ToolBar = ({ editor }) => {
                 )}
               >
                 {tool.icon ? (
-                  <span className="material-symbols-outlined text-lg">{tool.icon}</span>
+                  <tool.icon className="text-lg" />
                 ) : (
                   <span className="text-xs font-bold">{tool.label}</span>
                 )}
@@ -130,7 +131,7 @@ const PreviewModal = ({ isOpen, onClose, title, content, images, categories, tag
               onClick={onClose}
               className="p-2 hover:bg-white/20 rounded-lg transition-colors"
             >
-              <span className="material-symbols-outlined">close</span>
+              <FaXmark className="text-xl" />
             </button>
           </div>
 
@@ -144,10 +145,10 @@ const PreviewModal = ({ isOpen, onClose, title, content, images, categories, tag
                   {images.length > 1 && (
                     <>
                       <button onClick={(e) => { e.stopPropagation(); setPreviewIndex(i => (i - 1 + images.length) % images.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/40 p-2 rounded-full shadow">
-                        <span className="material-symbols-outlined">chevron_left</span>
+                        <FaChevronLeft className="text-xl" />
                       </button>
                       <button onClick={(e) => { e.stopPropagation(); setPreviewIndex(i => (i + 1) % images.length); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-black/40 p-2 rounded-full shadow">
-                        <span className="material-symbols-outlined">chevron_right</span>
+                        <FaChevronRight className="text-xl" />
                       </button>
                     </>
                   )}
@@ -408,7 +409,7 @@ const CreateEditPost = () => {
               onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
             >
-              <span className="material-symbols-outlined">arrow_back</span>
+              <FaArrowLeft className="text-lg" />
               <span className="font-medium text-sm">Back</span>
             </motion.button>
 
@@ -420,7 +421,7 @@ const CreateEditPost = () => {
                 onClick={() => setShowPreview(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 card-bg text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               >
-                <span className="material-symbols-outlined">preview</span>
+                <FaEye className="text-lg" />
                 <span className="text-sm font-medium hidden sm:inline">Preview</span>
               </motion.button>
 
@@ -446,12 +447,12 @@ const CreateEditPost = () => {
               >
                 {loading ? (
                   <>
-                    <span className="material-symbols-outlined animate-spin text-lg">refresh</span>
+                    <FaSpinner className="animate-spin text-lg" />
                     <span className="text-sm">Saving...</span>
                   </>
                 ) : (
                   <>
-                    <span className="material-symbols-outlined text-lg">{id ? 'check' : 'publish'}</span>
+                    <FaCheck className="text-lg" />
                     <span className="text-sm">{id ? 'Update' : 'Publish'}</span>
                   </>
                 )}
@@ -482,7 +483,7 @@ const CreateEditPost = () => {
               onChange={(e) => setTitle(e.target.value)}
               required
               placeholder="Enter your blog title..."
-              className="w-full text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 border-0 focus:ring-0 outline-none bg-transparent"
+              className="w-full text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 border-0 focus:ring-0 outline-none bg-transparent"
             />
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Make it catchy and engaging</p>
           </motion.div>
@@ -504,11 +505,11 @@ const CreateEditPost = () => {
                 />
                 <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-12 flex flex-col items-center justify-center text-center transition-all group-hover:border-blue-400 dark:group-hover:border-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/20 group-hover:shadow-lg cursor-pointer">
                   <motion.span
-                    className="material-symbols-outlined text-6xl text-slate-400 dark:text-slate-500 mb-4 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors"
+                    className="text-6xl text-slate-400 dark:text-slate-500 mb-4 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors"
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    image
+                    <FaImage className="text-6xl" />
                   </motion.span>
                   <p className="text-lg font-semibold text-slate-900 dark:text-slate-200">Add your cover image</p>
                   <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Click to browse or drag and drop</p>
@@ -526,15 +527,15 @@ const CreateEditPost = () => {
                     onClick={() => removeImage(currentPreviewIndex)}
                     className="absolute top-3 right-3 w-9 h-9 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow"
                   >
-                    <span className="material-symbols-outlined">close</span>
+                    <FaXmark className="text-lg" />
                   </button>
                   {imagePreviews.length > 1 && (
                     <>
                       <button onClick={(e) => { e.stopPropagation(); setCurrentPreviewIndex(i => (i - 1 + imagePreviews.length) % imagePreviews.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow">
-                        <span className="material-symbols-outlined">chevron_left</span>
+                        <FaChevronLeft className="text-lg" />
                       </button>
                       <button onClick={(e) => { e.stopPropagation(); setCurrentPreviewIndex(i => (i + 1) % imagePreviews.length); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow">
-                        <span className="material-symbols-outlined">chevron_right</span>
+                        <FaChevronRight className="text-lg" />
                       </button>
                     </>
                   )}
@@ -559,7 +560,7 @@ const CreateEditPost = () => {
                     onChange={handleImageChange}
                     className="hidden"
                   />
-                  <span className="material-symbols-outlined text-2xl text-slate-400 dark:text-slate-500 mb-2 inline-block">add_photo_alternate</span>
+                  <span className="text-2xl text-slate-400 dark:text-slate-500 mb-2 inline-block"><FaImage className="text-2xl" /></span>
                   <p className="text-slate-600 dark:text-slate-400 text-sm">Add more images</p>
                 </motion.label>
               </div>
